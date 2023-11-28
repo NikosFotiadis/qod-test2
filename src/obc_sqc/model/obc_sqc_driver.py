@@ -34,7 +34,9 @@ class ObcSqcCheck:
             fnl_timeslot,
             rh_threshold,
             parameters_for_testing,
-            availability_threshold,
+            availability_threshold_median,
+            availability_threshold_m,
+            availability_threshold_h,
             raw_cntrl_thresholds,
             minute_cntrl_thresholds,
             minute_averaging_period,
@@ -44,7 +46,6 @@ class ObcSqcCheck:
             time_window_constant_max,
             ann_constant_max,
             pr_int,
-            pr_hourly_availability,
             preprocess_time_window,
         ) = InitialParams.picking_initial_parameters(model)
 
@@ -98,7 +99,7 @@ class ObcSqcCheck:
                 raw_cntrl_thresholds[i],
                 data_timestep,
                 time_window_median,
-                availability_threshold[i],
+                availability_threshold_median[i],
                 ann_no_median,
                 ann_no_datum,
                 ann_invalid_datum,
@@ -112,12 +113,12 @@ class ObcSqcCheck:
                 final_df_param,
                 parameter,
                 minute_averaging_period[i],
-                availability_threshold[i],
+                availability_threshold_m[i],
+                availability_threshold_median[i],
                 time_window_median,
                 minute_cntrl_thresholds[i],
                 ann_invalid_datum,
                 pr_int,
-                pr_hourly_availability,
                 preprocess_time_window,
                 model,
             )
@@ -155,7 +156,7 @@ class ObcSqcCheck:
                 results_mapping[parameter]["hour_averaging"] = HourlyAveraging.average_in_hour(
                     minute_averaging,
                     fnl_timeslot,
-                    availability_threshold[i],
+                    availability_threshold_h[i],
                     parameter,
                 )
             else:
@@ -220,7 +221,7 @@ class ObcSqcCheck:
         total_rewards: float = ObcSqcCheck.calculate_daily_score(
             parameters_for_testing, results_mapping, flattened_results
         )
-        qod_version: str = "1.0.0"
+        qod_version: str = "1.0.1"
 
         result_df["qod_score"] = total_rewards
         result_df["hourly_score"] = result_df[[f"{x}_score" for x in results_mapping]].mean(axis=1)

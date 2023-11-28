@@ -16,11 +16,11 @@ class MinuteAveraging:  # noqa: D101
         parameter,
         averaging_period,
         availability_threshold,
+        availability_threshold_median,
         time_window_median,
         control_threshold,
         ann_invalid_datum,
         pr_int,
-        pr_hourly_availability,
         preprocess_time_window,
         station_type,
     ):
@@ -39,6 +39,8 @@ class MinuteAveraging:  # noqa: D101
             which is a dataframe with a fixed temporal resolution
         parameter (str): the parameter that this def looks into, e.g., temperature, humidity, wind speed etc.
         averaging_period (): the desired period for averaging, e.g., we want to calculate 2-minute averages
+        availability_threshold_median (float): the availability threshold, e.g., we are able to calculate median
+            only if <67%/75% of timeslots within a certain period are available
         availability_threshold (float): the availability threshold, e.g., if <67% of timeslots within a certain period
             is available, averaging or rewarding is not possible [x out of 1]
         time_window_median (): the time window for rolling median [in minutes]
@@ -62,9 +64,6 @@ class MinuteAveraging:  # noqa: D101
 
         # convert time to datetime format
         fnl_df["utc_datetime"] = pd.to_datetime(fnl_df["utc_datetime"])
-
-        if parameter == "precipitation_accumulated" and station_type != "WS1000":
-            availability_threshold = pr_hourly_availability
 
         # In case of wind spd/dir, we need to apply vector average
         if parameter == "wind_speed" or parameter == "wind_direction":  # noqa: PLR1714
@@ -247,8 +246,8 @@ class MinuteAveraging:  # noqa: D101
             percentage_available = available_observations / possible_observations
 
             # assign np.nan to rolling median where percentage of available observations is less
-            # than availability_threshold (e.g. 67%)
-            rolling_median[percentage_available < availability_threshold] = np.nan
+            # than availability_threshold_median (e.g. 67%)
+            rolling_median[percentage_available < availability_threshold_median] = np.nan
 
             # create a new column in the DataFrame with the rolling median values
             # we create new columns
@@ -363,7 +362,7 @@ class MinuteAveraging:  # noqa: D101
         minute_averaging = minute_averaging.apply(
             AnnotationUtils.update_ann_text,
             args=(
-                "SPIKES",
+                "ANOMALOUS_INCREASE",
                 "ann_invalid_datum",
             ),
             axis=1,
@@ -373,7 +372,7 @@ class MinuteAveraging:  # noqa: D101
         minute_averaging = minute_averaging.apply(
             AnnotationUtils.update_ann_text,
             args=(
-                "NO_DATA",
+                "NO_DATA_MIN",
                 "ann_all_from_raw",
             ),
             axis=1,

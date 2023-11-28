@@ -28,7 +28,7 @@ class AnnotationUtils:  # noqa: D101
 
         # Assign corresponding text to each mask
         text_obc = "OBC"
-        text_invalid_datum = "SPIKES"
+        text_invalid_datum = "SPIKES_INST"
         text_no_median = "NO_MEDIAN"
         text_no_datum = "NO_DATA"
         text_constant = "SHORT_CONST"
@@ -199,7 +199,7 @@ class AnnotationUtils:  # noqa: D101
         # Raw columns and their fault codes
         selected_columns: dict[str, str] = {
             "ann_obc": "OBC",
-            "ann_invalid_datum": "SPIKES_RAW",
+            "ann_invalid_datum": "SPIKES_INST",
             "ann_no_median": "NO_MEDIAN",
             "ann_no_datum": "NO_DATA",
             "ann_constant": "SHORT_CONST",
@@ -216,7 +216,7 @@ class AnnotationUtils:  # noqa: D101
 
         # Minute columns and their fault codes
         selected_columns = {
-            "ann_invalid_datum": "ANOM_INCREASE",
+            "ann_invalid_datum": "ANOMALOUS_INCREASE",
         }
 
         # Filter the minute-averaged DataFrame to include only the last 24hours and selected columns

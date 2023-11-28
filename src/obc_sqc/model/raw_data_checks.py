@@ -12,7 +12,7 @@ class RawDataChecks:  # noqa: D101
         control_threshold,
         minimum_timestep,
         time_window,
-        availability_threshold,
+        availability_threshold_median,
         ann_no_median,
         ann_no_datum,
         ann_invalid_datum,
@@ -32,8 +32,8 @@ class RawDataChecks:  # noqa: D101
         control_threshold (int): the threshold to check for jumps in a parameter
         minimum_timestep (int): the timestep of the reframed raw data (e.g., 16sec) [in seconds]
         time_window (int): the time window for rolling median [in minutes]
-        availability_threshold (float): the availability threshold, e.g., if <67% of timeslots within a certain period
-            is available, averaging or rewarding is not possible [x out of 1]
+        availability_threshold_median (float): the availability threshold, e.g., we are able to calculate median
+            only if <67%/75% of timeslots within a certain period are available
         ann_no_median (int): annotation where no median has been calculated
         ann_no_datum (int): annotation where no datum is available
         ann_invalid_datum (int): annotation where the datum exists, but it's not valid
@@ -73,8 +73,8 @@ class RawDataChecks:  # noqa: D101
             percentage_available = available_observations / possible_observations
 
             # Assign np.nan to rolling median where percentage of available observations is
-            # less than the availability_threshold (e.g., 67%)
-            rolling_median[percentage_available < availability_threshold] = np.nan
+            # less than the availability_threshold_median (e.g., 67%)
+            rolling_median[percentage_available < availability_threshold_median] = np.nan
 
             # Create a new column in the df with the rolling median values
             fnl_df["rolling_median"] = rolling_median
@@ -116,8 +116,8 @@ class RawDataChecks:  # noqa: D101
 
                         # In case the difference is large, check which abs(value-median)
                         # of the couple of observations is larger and annotate
-                        # Warning! If median is not available, fnl_df['ann_invalid_datum']=0. However,
-                        # later we will annotate all elements with not available median as invalid
+                        # Warning! If median is not available, fnl_df['ann_invalid_datum']=0.
+                        # However, later we will annotate all elements with not available median as invalid
                         if prev_val > curr_val:
                             fnl_df.loc[i - 1, "ann_invalid_datum"] = ann_invalid_datum
                         elif curr_val > prev_val:

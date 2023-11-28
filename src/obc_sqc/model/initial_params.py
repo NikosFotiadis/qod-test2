@@ -62,12 +62,13 @@ class InitialParams:  # noqa: D101
 
             # This is the availability threshold [x out of 1], e.g., if <66% of timeslots within
             # a certain period is available averaging or rewarding is not possible
-            availability_threshold = [0.67, 0.67, 0.75, 0.75, 0.67, 0.67, 0.3]
+            availability_threshold_median = [0.67, 0.67, 0.75, 0.75, 0.67, 0.67, np.nan]
+            availability_threshold_m = [0.33, 0.33, 0.33, 0.33, 0.33, 0.33, 0.33]
+            availability_threshold_h = [0.67, 0.67, 0.75, 0.75, 0.67, 0.67, 0.85]
 
-            pr_hourly_availability = 0.85  # This is the availability threshold for precipitation in the hourly level
+            # pr_hourly_availability = 0.85  # This is the availability threshold for precipitation in the hourly level
 
             # jump thresholds for checking raw data
-
             raw_control_thresholds = [5, 2, 20, np.nan, 0.3, 97600, np.nan]
 
             # jump thresholds for checking averaged data
@@ -141,7 +142,17 @@ class InitialParams:  # noqa: D101
 
             # This is the availability threshold [x out of 1], e.g., if <66% of timeslots
             # within a certain period is available averaging or rewarding is not possible
-            availability_threshold = [
+            availability_threshold_median = [0.67, 0.67, 0.75, 0.75, 0.67, 0.67, np.nan]
+            availability_threshold_m = [
+                0.33,
+                0.33,
+                0.33,
+                0.33,
+                0.33,
+                0.33,
+                0.33,
+            ]  # this is not used in WS2000, it's given only for not breaking the processes
+            availability_threshold_h = [
                 0.67,
                 0.67,
                 0.75,
@@ -151,7 +162,7 @@ class InitialParams:  # noqa: D101
                 0.85,
             ]
 
-            pr_hourly_availability = 0.85  # This is the availability threshold for precipitation in the hourly level
+            # pr_hourly_availability = 0.85  # This is the availability threshold for precipitation in the hourly level
 
             # jump thresholds for checking raw data
             raw_control_thresholds = [10, 3, 10, 10, 0.5, 97600, np.nan]
@@ -250,7 +261,9 @@ class InitialParams:  # noqa: D101
             fnl_timeslot,
             rh_threshold,
             parameters_for_testing,
-            availability_threshold,
+            availability_threshold_median,
+            availability_threshold_m,
+            availability_threshold_h,
             raw_control_thresholds,
             minute_control_thresholds,
             minute_averaging_period,
@@ -260,6 +273,5 @@ class InitialParams:  # noqa: D101
             time_window_constant_max,
             ann_constant_max,
             pr_int,
-            pr_hourly_availability,
             preprocess_timewindow,
         )
