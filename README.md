@@ -32,3 +32,11 @@ Simply navigate to Project Settings -> Modules and then set 'Source Root' the to
 
 ### Plugins
 * ruff (Intellij)
+
+### Visualizations for profiling
+
+cProfiler
+
+    brew install graphviz
+
+    gprof2dot -f pstats cprofile.pstats | dot -Tpng -o output.png

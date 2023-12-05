@@ -32,7 +32,6 @@ urllib3 = "1.26.18"
 mlflow = {version="2.6.0",extras = ['all']}
 
 [tool.poetry.group.dev.dependencies]
-mkdocs = "^1.5.3"
 pre-commit = "3.3.1"
 
 [tool.poetry.group.test.dependencies]
@@ -43,6 +42,8 @@ pytest-asyncio = "*"
 pytest-runner = "*"
 pytest = "7.3.1"
 pytest-github-actions-annotate-failures = "*"
+scalene = "1.5.31.1"
+snakeviz = "2.2.0"
 
 [tool.poetry.group.typing.dependencies]
 mypy = "1.6.1"
@@ -139,6 +140,9 @@ ignore = [
     "D213",
     "D104",
     "D203",
+    "PD901",
+    "PLR6301",
+    "PLR0913",
 ]
 
 [tool.ruff.format]
@@ -227,7 +231,6 @@ exclude = [
     "src/obc_sqc/model/annotation_utils.py",
     "src/obc_sqc/model/constant_data_check.py",
     "src/obc_sqc/model/filling_ignoring_period.py",
-    "src/obc_sqc/model/hourly_average.py",
     "src/obc_sqc/model/initial_params.py",
     "src/obc_sqc/model/minute_averaging.py",
     "src/obc_sqc/model/obc_sqc_driver.py",

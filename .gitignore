@@ -176,8 +176,6 @@ cython_debug/
 mlruns
 mlartifacts
 .env
-.env.prod
-.env.dev
 secrets.txt
 output/*
 infra/airflow/airflow_data/*
@@ -187,5 +185,10 @@ drivers
 /.mypy_cache/
 /.ruff_cache/
 
-.vscode/*
 .DS_Store
+/profiling/
+/profile.html
+/profile.json
+/cprofile.pstats
+
+*.png

@@ -1,3 +1,9 @@
+.DEFAULT_GOAL := help
+
+.PHONY: help
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+
 .PHONY: install
 install: ## Install the poetry environment with all non-optional dependencies.
 	@echo "🚀 Creating virtual environment"
@@ -62,7 +68,7 @@ clean: ## Clean intermediate files
 .PHONY: test
 test: ## Test the code with pytest
 	@echo "🚀 Testing code: Running pytest"
-	@poetry run pytest -rP --cov --cov-config=pyproject.toml --cov-report=xml
+	@poetry run pytest tests/obc_sqc/$(file) -rP --cov --cov-config=pyproject.toml --cov-report=xml
 
 .PHONY: build
 build: clean-build ## Build wheel file using poetry
@@ -81,8 +87,11 @@ docs-test: ## Test if documentation can be built without warnings or errors
 docs: ## Build and serve the documentation
 	@poetry run mkdocs serve
 
-.PHONY: help
-help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+# Docker
+.PHONY: docker-build docker-clean
 
-.DEFAULT_GOAL := help
+docker-build:	## Build docker image
+	docker build -t weather-analytics .
+
+docker-clean:	## Delete docker image
+	docker rmi weather-analytics

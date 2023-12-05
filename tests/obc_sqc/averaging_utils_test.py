@@ -5,14 +5,14 @@ import pandas as pd
 import pytest
 
 from obc_sqc.model.averaging_utils import AveragingUtils
-from tests.obc_sqc.fixtures.average_utils_fixtures_test import *  # noqa: F403
+from tests.obc_sqc.fixtures.averaging_utils_fixtures_test import *  # noqa: F403
 
 
 class TestColumnAverageUsingAnnotation:
     """Tests the column_average_using_annotation() function in multiple scenarios."""
 
     @pytest.mark.parametrize("threshold", np.round(np.arange(0.1, 0.8, 0.1, dtype=np.float64), decimals=1))
-    def test_normal_return_float_success(self, threshold: float, sample_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_normal_return_float_success(self, threshold: float, sample_df: pd.DataFrame) -> None:
         """Tests column_average_using_annotation() with a sample dataframe and a sufficient threshold.
 
         Args:
@@ -36,7 +36,7 @@ class TestColumnAverageUsingAnnotation:
         assert average == target_average
 
     @pytest.mark.parametrize("threshold", np.round(np.arange(0.8, 1.1, 0.1, dtype=np.float64), decimals=1))
-    def test_normal_return_nan_success(self, threshold: float, sample_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_normal_return_nan_success(self, threshold: float, sample_df: pd.DataFrame) -> None:
         """Tests column_average_using_annotation() with a sample dataframe and an insufficient threshold.
 
         Args:
@@ -58,7 +58,7 @@ class TestColumnAverageUsingAnnotation:
         assert average is np.nan
 
     @pytest.mark.parametrize("threshold", [0.01, 0.99])
-    def test_empty_crash(self, threshold: float, empty_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_empty_return_nan_success(self, threshold: float, empty_df: pd.DataFrame) -> None:
         """Tests column_average_using_annotation() with an empty dataframe.
 
         Args:
@@ -80,7 +80,7 @@ class TestColumnAverageUsingAnnotation:
         assert average is np.nan
 
     @pytest.mark.parametrize("threshold", [0.01, 0.99])
-    def test_nans_return_nan_success(self, threshold: float, nan_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_nans_return_nan_success(self, threshold: float, nan_df: pd.DataFrame) -> None:
         """Tests column_average_using_annotation() with a dataframe filled with nans.
 
         Args:
@@ -106,7 +106,7 @@ class TestColumnWindSpeedAverageUsingAnnotation:
     """Tests the column_wind_speed_average_using_annotation() function in multiple scenarios."""
 
     @pytest.mark.parametrize("threshold", np.round(np.arange(0, 0.5, 0.2, dtype=np.float64), decimals=1))
-    def test_normal_return_float_success(self, threshold: float, sample_wind_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_normal_return_float_success(self, threshold: float, sample_wind_df: pd.DataFrame) -> None:
         """Tests column_wind_speed_average_using_annotation() with a sample dataframe and a sufficient threshold.
 
         Args:
@@ -129,7 +129,7 @@ class TestColumnWindSpeedAverageUsingAnnotation:
         assert average == target_average
 
     @pytest.mark.parametrize("threshold", np.round(np.arange(0.5, 1.1, 0.2, dtype=np.float64), decimals=1))
-    def test_normal_return_nan_success(self, threshold: float, sample_wind_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_normal_return_nan_success(self, threshold: float, sample_wind_df: pd.DataFrame) -> None:
         """Tests column_wind_speed_average_using_annotation() with a sample dataframe and an insufficient threshold.
 
         Args:
@@ -150,7 +150,7 @@ class TestColumnWindSpeedAverageUsingAnnotation:
         assert average is np.nan
 
     @pytest.mark.parametrize("threshold", [0.01, 0.99])
-    def test_empty_crash(self, threshold: float, empty_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_empty_return_nan_success(self, threshold: float, empty_df: pd.DataFrame) -> None:
         """Tests column_wind_speed_average_using_annotation() with an empty dataframe.
 
         Args:
@@ -171,7 +171,7 @@ class TestColumnWindSpeedAverageUsingAnnotation:
         assert average is np.nan
 
     @pytest.mark.parametrize("threshold", [0.01, 0.99])
-    def test_nans_return_nan_success(self, threshold: float, nan_wind_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_nans_return_nan_success(self, threshold: float, nan_wind_df: pd.DataFrame) -> None:
         """Tests column_wind_speed_average_using_annotation() with a dataframe filled with nans.
 
         Args:
@@ -196,7 +196,7 @@ class TestColumnWindDirectionAverageUsingAnnotation:
     """Tests the column_wind_direction_average_using_annotation() function in multiple scenarios."""
 
     @pytest.mark.parametrize("threshold", np.round(np.arange(0, 0.5, 0.2, dtype=np.float64), decimals=1))
-    def test_normal_return_float_success(self, threshold: float, sample_wind_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_normal_return_float_success(self, threshold: float, sample_wind_df: pd.DataFrame) -> None:
         """Tests column_wind_direction_average_using_annotation() with a sample dataframe and a sufficient threshold.
 
         Args:
@@ -216,7 +216,7 @@ class TestColumnWindDirectionAverageUsingAnnotation:
 
         assert average == pytest.approx(126.87, abs=1)
 
-    def test_complicated_return_float_success(self, complicated_wind_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_complicated_return_float_success(self, complicated_wind_df: pd.DataFrame) -> None:
         """Tests column_wind_direction_average_using_annotation().
 
             Test is performed using a sample, more complicated, dataframe and a sufficient threshold.
@@ -243,7 +243,7 @@ class TestColumnWindDirectionAverageUsingAnnotation:
         ).all()
 
     @pytest.mark.parametrize("threshold", np.round(np.arange(0.5, 1.1, 0.2, dtype=np.float64), decimals=1))
-    def test_normal_return_nan_success(self, threshold: float, sample_wind_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_normal_return_nan_success(self, threshold: float, sample_wind_df: pd.DataFrame) -> None:
         """Tests column_wind_direction_average_using_annotation().
 
             Test is performed using a sample dataframe and an insufficient threshold.
@@ -266,7 +266,7 @@ class TestColumnWindDirectionAverageUsingAnnotation:
         assert average is np.nan
 
     @pytest.mark.parametrize("threshold", [0.01, 0.99])
-    def test_empty_crash(self, threshold: float, empty_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_empty_return_nan_success(self, threshold: float, empty_df: pd.DataFrame) -> None:
         """Tests column_wind_direction_average_using_annotation() with an empty dataframe.
 
         Args:
@@ -287,7 +287,7 @@ class TestColumnWindDirectionAverageUsingAnnotation:
         assert average is np.nan
 
     @pytest.mark.parametrize("threshold", [0.01, 0.99])
-    def test_nans_return_nan_success(self, threshold: float, nan_wind_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_nans_return_nan_success(self, threshold: float, nan_wind_df: pd.DataFrame) -> None:
         """Tests column_wind_direction_average_using_annotation() with a dataframe filled with nans.
 
         Args:
@@ -299,7 +299,7 @@ class TestColumnWindDirectionAverageUsingAnnotation:
         -------
             None
         """
-        annotation_column_name = "annotation"
+        annotation_column_name: str = "annotation"
 
         average: float = AveragingUtils.column_wind_direction_average_using_annotation(
             nan_wind_df, threshold, annotation_column_name
@@ -311,7 +311,7 @@ class TestColumnWindDirectionAverageUsingAnnotation:
 class TestRowWindSpeedCalculation:
     """Tests the row_wind_speed_calculation() function in multiple scenarios."""
 
-    def test_normal_return_float_success(self, sample_wind_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_normal_return_float_success(self, sample_wind_df: pd.DataFrame) -> None:
         """Tests row_wind_speed_calculation().
 
             Test is performed using sample rows of a DataFrame, containing u and v wind components.
@@ -330,7 +330,7 @@ class TestRowWindSpeedCalculation:
             sample_wind_df.apply(AveragingUtils.row_wind_speed_calculation, axis=1) == sample_wind_df["speed"]
         ).all()
 
-    def test_empty_crash(self, empty_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_empty_return_empty(self, empty_df: pd.DataFrame) -> None:
         """Tests row_wind_speed_calculation() with empty rows of an empty DataFrame.
 
         Args:
@@ -341,13 +341,12 @@ class TestRowWindSpeedCalculation:
         -------
             None
         """
+        assert (
+            empty_df.apply(AveragingUtils.row_wind_speed_calculation, axis=1, result_type="reduce")
+            == pd.Series(dtype="float64")
+        ).all()
 
-        def check_key_error(row: Any) -> None:
-            AveragingUtils.row_wind_speed_calculation(row)
-
-        empty_df.apply(check_key_error, axis=1)  # type: ignore[call-overload]
-
-    def test_nans_return_nan_success(self, nan_wind_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_nans_return_nan_success(self, nan_wind_df: pd.DataFrame) -> None:
         """Tests row_wind_speed_calculation() with rows of a DataFrame, containing only nans.
 
         Args:
@@ -366,7 +365,7 @@ class TestRowWindSpeedCalculation:
 class TestRowWindDirectionCalculation:
     """Tests the row_wind_direction_calculation() function in multiple scenarios."""
 
-    def test_normal_return_float_success(self, sample_wind_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_normal_return_float_success(self, sample_wind_df: pd.DataFrame) -> None:
         """Tests row_wind_direction_calculation().
 
             Test is performed using sample rows of a DataFrame, containing u and v wind components.
@@ -385,7 +384,7 @@ class TestRowWindDirectionCalculation:
             sample_wind_df["direction"].astype(np.float64), abs=1
         )
 
-    def test_complicated_return_float_success(self, complicated_wind_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_complicated_return_float_success(self, complicated_wind_df: pd.DataFrame) -> None:
         """Tests row_wind_direction_calculation().
 
             Test is performed using sample, more complicated, rows of a DataFrame, containing
@@ -406,7 +405,7 @@ class TestRowWindDirectionCalculation:
             == complicated_wind_df["direction"]
         ).all()
 
-    def test_empty_crash(self, empty_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_empty_crash(self, empty_df: pd.DataFrame) -> None:
         """Tests row_wind_direction_calculation() with empty rows of an empty DataFrame.
 
         Args:
@@ -424,7 +423,7 @@ class TestRowWindDirectionCalculation:
 
         empty_df.apply(check_key_error, axis=1)  # type: ignore[call-overload]
 
-    def test_nans_return_nan_success(self, nan_wind_df: pd.DataFrame) -> None:  # noqa: PLR6301
+    def test_nans_return_nan_success(self, nan_wind_df: pd.DataFrame) -> None:
         """Tests row_wind_direction_calculation() with rows of a DataFrame, containing only nans.
 
         Args:

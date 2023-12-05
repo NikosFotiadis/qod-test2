@@ -27,7 +27,7 @@ def main():  # noqa: D103
         print(f"Model info: {model_info}")
 
         cur_model_uri: str = model_info.model_uri
-        model_reg_result = mlflow.register_model(cur_model_uri, "obc_sqc", tags={"project": "qod", "version": "1.0.1"})
+        model_reg_result = mlflow.register_model(cur_model_uri, "obc_sqc", tags={"project": "qod", "version": "1.0.2"})
         print(f"New model version: {model_reg_result.version}")
 
 

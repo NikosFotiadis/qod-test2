@@ -6,7 +6,7 @@ import pandas as pd
 
 class ConstantDataCheck:  # noqa: D101
     @staticmethod
-    def check_for_constant_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
+    def check_for_constant_data(  # noqa: C901, PLR0912, PLR0915
         fnl_df,
         parameter,
         data_timestep,

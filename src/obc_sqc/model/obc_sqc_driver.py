@@ -7,7 +7,7 @@ import pandas as pd
 from obc_sqc.model.annotation_utils import AnnotationUtils
 from obc_sqc.model.constant_data_check import ConstantDataCheck
 from obc_sqc.model.filling_ignoring_period import FillingIgnoringPeriod
-from obc_sqc.model.hourly_average import HourlyAveraging
+from obc_sqc.model.hour_averaging import HourAveraging
 from obc_sqc.model.initial_params import InitialParams
 from obc_sqc.model.minute_averaging import MinuteAveraging
 from obc_sqc.model.raw_data_checks import RawDataChecks
@@ -108,8 +108,8 @@ class ObcSqcCheck:
                 final_df_param, time_window_constant[i], time_window_constant_max[i]
             )
 
-            # average_in_minute can produce averages per minute (for WS1000) or per hour (for WS2000)
-            final_df_param, minute_averaging = MinuteAveraging.average_in_minute(
+            # minute_averaging() can produce averages per minute (for WS1000) or per hour (for WS2000)
+            final_df_param, minute_averaging = MinuteAveraging.minute_averaging(
                 final_df_param,
                 parameter,
                 minute_averaging_period[i],
@@ -120,7 +120,6 @@ class ObcSqcCheck:
                 ann_invalid_datum,
                 pr_int,
                 preprocess_time_window,
-                model,
             )
 
             # keep only the useful columns in the raw result
@@ -153,7 +152,7 @@ class ObcSqcCheck:
 
             # Only stations with sampling rate <30sec can have both per minute and per hour checks
             if model == "WS1000":
-                results_mapping[parameter]["hour_averaging"] = HourlyAveraging.average_in_hour(
+                results_mapping[parameter]["hour_averaging"] = HourAveraging.hour_averaging(
                     minute_averaging,
                     fnl_timeslot,
                     availability_threshold_h[i],
@@ -168,7 +167,9 @@ class ObcSqcCheck:
 
             # assign the result to a new column, named "hourly_annotation", belonging to the "hour_averaging" key
             # of the results_mapping[parameter]
-            results_mapping[parameter]["hour_averaging"]["hourly_annotation"] = hourly_annotation.apply(lambda x: x[0])
+            df_to_modify: pd.DataFrame = results_mapping[parameter]["hour_averaging"]
+            df_to_modify["hourly_annotation"] = hourly_annotation.apply(lambda x: x[0])
+            results_mapping[parameter]["hour_averaging"] = df_to_modify
 
         # Aggregate results
         param_items: list[pd.DataFrame] = []
@@ -251,7 +252,7 @@ class ObcSqcCheck:
             "illuminance",
             "precipitation_accumulated",
         ]
-        df = inp_df.copy()  # noqa: PD901
+        df = inp_df.copy()
 
         # Daily annotations per weather variable
         daily_weather_ann: dict[str, [dict[str, float]]] = {}
@@ -360,30 +361,13 @@ class ObcSqcCheck:
         adjusted_hourly_rewards: dict[str, list[float]] = {p: [] for p in parameters_for_testing}
         for p, param_vals in rewards_per_parameters.items():
             for hourly_reward_percentage in param_vals:
-                hourly_reward = hourly_reward_percentage / 100
-                if p in ["temperature", "humidity", "pressure", "illuminance"]:  # noqa: PLR6201
-                    reward = hourly_reward if hourly_reward >= 0.67 else 0  # noqa: PLR2004
-                elif p in ["precipitation_accumulated"]:  # noqa: PLR6201
-                    reward = hourly_reward if hourly_reward >= 0.85 else 0  # noqa: PLR2004
-                else:
-                    reward = hourly_reward if hourly_reward >= 0.75 else 0  # noqa: PLR2004
+                reward = hourly_reward_percentage / 100
                 adjusted_hourly_rewards[p].append(reward)
 
         adjusted_daily_rewards: dict[any, float] = {}
         for param_name, param_vals in adjusted_hourly_rewards.items():
             potential_daily_rewards: float = sum(param_vals) / len(param_vals)
-            if param_name in ["temperature", "humidity", "pressure", "illuminance"]:  # noqa: PLR6201
-                adjusted_daily_rewards[param_name] = (
-                    potential_daily_rewards if potential_daily_rewards >= 0.67 else 0  # noqa: PLR2004
-                )
-            elif param_name in ["precipitation_accumulated"]:  # noqa: PLR6201
-                adjusted_daily_rewards[param_name] = (
-                    potential_daily_rewards if potential_daily_rewards >= 0.85 else 0  # noqa: PLR2004
-                )
-            else:
-                adjusted_daily_rewards[param_name] = (
-                    potential_daily_rewards if potential_daily_rewards >= 0.75 else 0  # noqa: PLR2004
-                )
+            adjusted_daily_rewards[param_name] = potential_daily_rewards
 
         # Final single score for rewards
         total_rewards: float = sum(adjusted_daily_rewards.values()) / len(adjusted_daily_rewards)

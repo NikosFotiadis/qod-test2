@@ -6,7 +6,7 @@ import pandas as pd
 
 class RawDataChecks:  # noqa: D101
     @staticmethod
-    def raw_data_suspicious_check(  # noqa: PLR0913, PLR0915
+    def raw_data_suspicious_check(  # noqa: PLR0915
         fnl_df,
         parameter,
         control_threshold,

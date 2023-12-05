@@ -19,7 +19,7 @@ def sample_df() -> pd.DataFrame:
     """
     data: dict[str, list[float]] = {"values": [25, 27, 23, 22, 26, 28, 29], "annotation": [0, np.nan, 0, 1, 0, 0, 0]}
 
-    dtypes = {
+    dtypes: dict[str, str] = {
         "values": "Float64",
         "annotation": "Float64",
     }
@@ -41,12 +41,12 @@ def empty_df() -> pd.DataFrame:
     -------
         pd.DataFrame: the created DataFrame
     """
-    dtypes = {
+    dtypes: dict[str, str] = {
         "values": "Float64",
         "annotation": "Float64",
     }
 
-    df = pd.DataFrame(columns=["values", "annotation"]).astype(dtype=dtypes)  # noqa: PD901
+    df: pd.DataFrame = pd.DataFrame(columns=["values", "annotation"]).astype(dtype=dtypes)
 
     return df
 
@@ -65,7 +65,7 @@ def nan_df() -> pd.DataFrame:
     """
     data: dict[str, list[float]] = {"values": [np.nan] * 7, "annotation": [np.nan] * 7}
 
-    dtypes = {
+    dtypes: dict[str, str] = {
         "values": "Float64",
         "annotation": "Float64",
     }
@@ -119,7 +119,7 @@ def sample_wind_df() -> pd.DataFrame:
         ],
     }
 
-    dtypes = {
+    dtypes: dict[str, str] = {
         "wind_u": "Float64",
         "wind_v": "Float64",
         "annotation": "Float64",
@@ -155,7 +155,7 @@ def complicated_wind_df() -> pd.DataFrame:
         "direction": [180, 90, 180, 270],
     }
 
-    dtypes = {
+    dtypes: dict[str, str] = {
         "wind_u": "Float64",
         "wind_v": "Float64",
         "annotation": "Float64",
@@ -180,7 +180,7 @@ def empty_wind_df() -> pd.DataFrame:
     -------
         pd.DataFrame: the created DataFrame
     """
-    dtypes = {
+    dtypes: dict[str, str] = {
         "wind_u": "Float64",
         "wind_v": "Float64",
         "annotation": "Float64",
@@ -188,7 +188,7 @@ def empty_wind_df() -> pd.DataFrame:
         "direction": "Float64",
     }
 
-    df = pd.DataFrame(columns=["wind_u", "wind_v", "annotation", "speed", "direction"]).astype(dtypes)  # noqa: PD901
+    df: pd.DataFrame = pd.DataFrame(columns=["wind_u", "wind_v", "annotation", "speed", "direction"]).astype(dtypes)
 
     return df
 
@@ -210,7 +210,7 @@ def nan_wind_df() -> pd.DataFrame:
     """
     data: dict[str, list[float]] = {"wind_u": [np.nan] * 7, "wind_v": [np.nan] * 7, "annotation": [np.nan] * 7}
 
-    dtypes = {
+    dtypes: dict[str, str] = {
         "wind_u": "Float64",
         "wind_v": "Float64",
         "annotation": "Float64",
