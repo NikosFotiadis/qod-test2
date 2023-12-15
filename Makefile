@@ -17,6 +17,14 @@ install-aws: install ## Installs dependencies for interacting with AWS
 	@echo "🚀 Installing AWS dependencies"
 	@poetry install --only aws
 
+.PHONY: install-local
+install-local: ## Installs dependencies for running the project locally
+	@echo "🚀 Creating virtual environment"
+	@poetry config virtualenvs.in-project true
+	@poetry config virtualenvs.prefer-active-python true
+	@poetry install --only local
+	@poetry self add poetry-dotenv-plugin
+
 .PHONY: install-mlflow
 install-mlflow: install ## Installs dependencies for interacting with MLFlow
 	@echo "🚀 Installing MLFlow dependencies"
@@ -64,6 +72,11 @@ clean: ## Clean intermediate files
 	@rm -rf coverage.xml
 	@rm -rf .pytest_cache
 	@rm -rf dist
+	@rm -rf profile.html
+	@rm -rf profile.json
+	@rm -rf cprofile.pstats
+	@rm -rf output.png
+	@rm -rf profiling
 
 .PHONY: test
 test: ## Test the code with pytest
@@ -95,3 +108,21 @@ docker-build:	## Build docker image
 
 docker-clean:	## Delete docker image
 	docker rmi weather-analytics
+
+# Profilers
+.PHONY: profile-inference-scalene
+profile-inference: ## Run the code with scalene profiling
+	mkdir -p profiling
+	@echo "🚀 Running code with profiling"
+	@poetry run python -m scalene --outfile scalene.html --html src/obc_sqc/iface/direct_model_inference.py --device_id $(device_id) --date $(date)
+
+.PHONY: profile-inference-cprofile
+profile-inference-cprofile: ## Run the code with cProfiler
+	mkdir -p profiling
+	@echo "🚀 Running code with profiling"
+	@poetry run python -m cProfile -o cprofile.pstats src/obc_sqc/iface/direct_model_inference.py --device_id $(device_id) --date $(date)
+
+.PHONY: profile-inference-cprofile-visualize
+profile-inference-cprofile-visualize: ## Visualize cProfiler output
+	gprof2dot -f pstats cprofile.pstats | dot -Tpng -o output.png || true # Ignore errors since it requires OS installation of graphviz
+	snakeviz cprofile.pstats

@@ -20,6 +20,20 @@ The default venv installation path can be changed using:
     poetry config virtualenvs.path
 ```
 
+## Local Docker run
+
+```bash
+    docker build -t wxm-qod:local .
+
+    docker run \
+      -v /datasets:/datasets \
+      wxm-qod:local obc_sqc.iface.file_model_inference\
+      --device_id <device_id> \
+      --date <date> \
+      --day1 <yesterday> \
+      --day2 <today>
+```
+
 ## Environment
 
 Copy the `.env.template` file to a new `.env` file.

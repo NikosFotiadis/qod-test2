@@ -93,6 +93,22 @@ class ObcSqcCheck:
                 final_df_param["ann_constant"] = 0
                 final_df_param["ann_constant_max"] = 0
 
+            #Here, ONLY for WS2000 if wind speed is constantly at 0m/s for certain predefined period, but wind direction varies,
+            #so that wind direction does not come with any of the constant annotations, constant annotations are removed from
+            #wind speed too.
+            if model == "WS2000":
+                #Keep wind direction annotations to use them in the next iteration for wind speed
+                if parameter == "wind_direction": 
+                    selected_columns = ['utc_datetime', 'ann_constant','ann_constant_long','ann_constant_frozen']
+                    wdir_constant_df = final_df_param[selected_columns].copy()
+
+                if parameter == "wind_speed": 
+                    merged_df = pd.merge(wdir_constant_df, final_df_param, on='utc_datetime', suffixes=('_wdir', '_final'))
+                    # Update 'ann_constant' in 'final_df_param' if wind direction is not constant
+                    final_df_param.loc[merged_df['ann_constant_wdir'] == 0, 'ann_constant'] = 0
+                    final_df_param.loc[merged_df['ann_constant_long_wdir'] == 0, 'ann_constant_long'] = 0
+                    final_df_param.loc[merged_df['ann_constant_frozen_wdir'] == 0, 'ann_constant_frozen'] = 0
+
             final_df_param = RawDataChecks.raw_data_suspicious_check(
                 final_df_param,
                 parameter,
@@ -222,7 +238,7 @@ class ObcSqcCheck:
         total_rewards: float = ObcSqcCheck.calculate_daily_score(
             parameters_for_testing, results_mapping, flattened_results
         )
-        qod_version: str = "1.0.1"
+        qod_version: str = "1.0.2"
 
         result_df["qod_score"] = total_rewards
         result_df["hourly_score"] = result_df[[f"{x}_score" for x in results_mapping]].mean(axis=1)

@@ -28,6 +28,18 @@ packaging = "23.0"
 opensearch-py = "2.4.1"
 urllib3 = "1.26.18"
 
+# TODO Some dependencies can be removed
+[tool.poetry.group.local.dependencies]
+awswrangler = "3.4.1"
+python = ">=3.10.0, <3.11"
+pandas = "1.5.1"
+python-dateutil = "2.8.2"
+pytz = "2021.1"
+six = "1.16.0"
+pyarrow = "10.0.0"
+packaging = "23.0"
+mlflow = "2.6.0"
+
 [tool.poetry.group.mlflow.dependencies]
 mlflow = {version="2.6.0",extras = ['all']}
 
@@ -61,6 +73,7 @@ pytest-github-actions-annotate-failures = "0.1.7"
 # CLI scripts
 [tool.poetry.scripts]
 local = "src.obc_sqc.iface.direct_model_inference:main"
+file = "src.obc_sqc.iface.file_model_inference:main"
 
 [build-system]
 requires = ["poetry-core"]

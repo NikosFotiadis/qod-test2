@@ -53,8 +53,8 @@ class InitialParams:  # noqa: D101
             parameters_for_testing = [
                 "humidity",
                 "temperature",
-                "wind_speed",
                 "wind_direction",
+                "wind_speed",
                 "pressure",
                 "illuminance",
                 "precipitation_accumulated",
@@ -63,16 +63,16 @@ class InitialParams:  # noqa: D101
             # This is the availability threshold [x out of 1], e.g., if <66% of timeslots within
             # a certain period is available averaging or rewarding is not possible
             availability_threshold_median = [0.67, 0.67, 0.75, 0.75, 0.67, 0.67, np.nan]
-            availability_threshold_m = [0.33, 0.33, 0.33, 0.33, 0.33, 0.33, 0.33]
+            availability_threshold_m = [0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25]
             availability_threshold_h = [0.67, 0.67, 0.75, 0.75, 0.67, 0.67, 0.85]
 
             # pr_hourly_availability = 0.85  # This is the availability threshold for precipitation in the hourly level
 
             # jump thresholds for checking raw data
-            raw_control_thresholds = [5, 2, 20, np.nan, 0.3, 97600, np.nan]
+            raw_control_thresholds = [5, 2, np.nan, 20, 0.3, 97600, np.nan]
 
             # jump thresholds for checking averaged data
-            minute_control_thresholds = [10, 3, 10, np.nan, 0.5, 97600, np.nan]
+            minute_control_thresholds = [10, 3, np.nan, 10, 0.5, 97600, np.nan]
 
             # the desired period for averaging each of the parameters
             minute_averaging_period = [1, 1, 2, 2, 1, 1, 1]
@@ -101,7 +101,7 @@ class InitialParams:  # noqa: D101
 
             obc_limits = [
                 [10, -40, 0, 0, 300, 0, 0],
-                [99, 60, 50, 359, 1100, 400000, pr_int * data_timestep],
+                [99, 60, 359, 50, 1100, 400000, pr_int * data_timestep],
             ]
 
         elif station_type == "WS2000":
@@ -133,8 +133,8 @@ class InitialParams:  # noqa: D101
             parameters_for_testing: list[str] = [
                 "humidity",
                 "temperature",
-                "wind_speed",
                 "wind_direction",
+                "wind_speed",
                 "pressure",
                 "illuminance",
                 "precipitation_accumulated",
@@ -144,13 +144,13 @@ class InitialParams:  # noqa: D101
             # within a certain period is available averaging or rewarding is not possible
             availability_threshold_median = [0.67, 0.67, 0.75, 0.75, 0.67, 0.67, np.nan]
             availability_threshold_m = [
-                0.33,
-                0.33,
-                0.33,
-                0.33,
-                0.33,
-                0.33,
-                0.33,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
             ]  # this is not used in WS2000, it's given only for not breaking the processes
             availability_threshold_h = [
                 0.67,
@@ -213,15 +213,15 @@ class InitialParams:  # noqa: D101
 
             obc_limits = [
                 [1, -40, 0, 0, 540, 0, 0],
-                [99, 80, 50, 359, 1100, 200000, pr_int * data_timestep],
+                [99, 80, 359, 50, 1100, 200000, pr_int * data_timestep],
             ]
 
             # upper thresholds that should not be exceeded e.g., per hour for each of the parameters
             upper_thresholds = [
                 80,
                 15,
-                15,
                 np.nan,
+                15,
                 15,
                 146400,
                 np.nan,
