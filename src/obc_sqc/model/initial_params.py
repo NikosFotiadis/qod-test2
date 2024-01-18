@@ -13,7 +13,7 @@ class InitialParams:  # noqa: D101
         result: a series of variables and lists that correspond to a certain weather station model.
             See the description of each parameter in the next lines after the #"""  # noqa: D202, D208, D209, D400, D415
 
-        ann_no_median = 2  # Annotation where no median has been calculated
+        ann_unident_spk = 2  # Annotation where spikes/dips are present but median has not been calculated
         ann_no_datum = 3  # Annotation where no datum is available
         ann_invalid_datum = 4  # Annotation where the datum exists but it's not valid
         ann_constant = 5  # Annotation where data are constant for a certain period of time
@@ -249,7 +249,7 @@ class InitialParams:  # noqa: D101
             ]
 
         return (
-            ann_no_median,
+            ann_unident_spk,
             ann_no_datum,
             ann_invalid_datum,
             ann_constant,

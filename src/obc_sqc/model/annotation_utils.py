@@ -20,7 +20,7 @@ class AnnotationUtils:  # noqa: D101
         # Create boolean masks for each condition
         mask_obc = fnl_df["ann_obc"] > 0
         mask_invalid_datum = fnl_df["ann_invalid_datum"] > 0
-        mask_no_median = fnl_df["ann_no_median"] > 0
+        mask_unident_spk = fnl_df["ann_unidentified_spike"] > 0
         mask_no_datum = fnl_df["ann_no_datum"] > 0
         mask_constant = fnl_df["ann_constant"] > 0
         mask_constant_max = fnl_df["ann_constant_long"] > 0
@@ -28,8 +28,8 @@ class AnnotationUtils:  # noqa: D101
 
         # Assign corresponding text to each mask
         text_obc = "OBC"
-        text_invalid_datum = "SPIKES_INST"
-        text_no_median = "NO_MEDIAN"
+        text_invalid_datum = "SPIKE_INST"
+        text_no_median = "UNIDENTIFIED_SPIKE"
         text_no_datum = "NO_DATA"
         text_constant = "SHORT_CONST"
         text_constant_max = "LONG_CONST"
@@ -44,7 +44,7 @@ class AnnotationUtils:  # noqa: D101
                 text += text_obc + delim
             if mask_invalid_datum[i]:
                 text += text_invalid_datum + delim
-            if mask_no_median[i]:
+            if mask_unident_spk[i]:
                 text += text_no_median + delim
             if mask_no_datum[i]:
                 text += text_no_datum + delim
@@ -199,8 +199,8 @@ class AnnotationUtils:  # noqa: D101
         # Raw columns and their fault codes
         selected_columns: dict[str, str] = {
             "ann_obc": "OBC",
-            "ann_invalid_datum": "SPIKES_INST",
-            "ann_no_median": "NO_MEDIAN",
+            "ann_invalid_datum": "SPIKE_INST",
+            "ann_unidentified_spike": "UNIDENTIFIED_SPIKE",
             "ann_no_datum": "NO_DATA",
             "ann_constant": "SHORT_CONST",
             "ann_constant_long": "LONG_CONST",
@@ -217,6 +217,7 @@ class AnnotationUtils:  # noqa: D101
         # Minute columns and their fault codes
         selected_columns = {
             "ann_invalid_datum": "ANOMALOUS_INCREASE",
+            "ann_unidentified_change": "UNIDENTIFIED_ANOMALOUS_CHANGE",
         }
 
         # Filter the minute-averaged DataFrame to include only the last 24hours and selected columns

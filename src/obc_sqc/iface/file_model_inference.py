@@ -10,12 +10,12 @@ import pandas as pd
 
 from obc_sqc.model.obc_sqc_driver import ObcSqcCheck
 from obc_sqc.schema.schema import SchemaDefinitions
+import warnings
 
 logger = logging.getLogger("obc_sqc")
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.DEBUG)
 
-import warnings
 
 warnings.filterwarnings("ignore")
 

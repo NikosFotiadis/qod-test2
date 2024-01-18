@@ -18,11 +18,11 @@ class ObcSqcCheck:
     """This class is the main class of the OBC/SQC algorithm."""
 
     @staticmethod
-    def run(df: pd.DataFrame) -> pd.DataFrame:  # noqa: D102, PLR0915
+    def run(df: pd.DataFrame) -> pd.DataFrame:  # noqa: D102, PLR0915, C901
         model: str = df["model"].iloc[0]
 
         (
-            ann_no_median,
+            ann_unident_spk,
             ann_no_datum,
             ann_invalid_datum,
             ann_constant,
@@ -93,21 +93,21 @@ class ObcSqcCheck:
                 final_df_param["ann_constant"] = 0
                 final_df_param["ann_constant_max"] = 0
 
-            #Here, ONLY for WS2000 if wind speed is constantly at 0m/s for certain predefined period, but wind direction varies,
-            #so that wind direction does not come with any of the constant annotations, constant annotations are removed from
-            #wind speed too.
+            # Here, ONLY for WS2000 if wind speed is constantly at 0m/s for certain predefined period,
+            # but wind direction varies, so that wind direction does not come with any of the constant annotations,
+            # constant annotations are removed from wind speed too.
             if model == "WS2000":
-                #Keep wind direction annotations to use them in the next iteration for wind speed
-                if parameter == "wind_direction": 
-                    selected_columns = ['utc_datetime', 'ann_constant','ann_constant_long','ann_constant_frozen']
+                # Keep wind direction annotations to use them in the next iteration for wind speed
+                if parameter == "wind_direction":
+                    selected_columns = ["utc_datetime", "ann_constant", "ann_constant_long", "ann_constant_frozen"]
                     wdir_constant_df = final_df_param[selected_columns].copy()
 
-                if parameter == "wind_speed": 
-                    merged_df = pd.merge(wdir_constant_df, final_df_param, on='utc_datetime', suffixes=('_wdir', '_final'))
+                if parameter == "wind_speed":
+                    merged_df = wdir_constant_df.merge(final_df_param, on="utc_datetime", suffixes=("_wdir", "_final"))
                     # Update 'ann_constant' in 'final_df_param' if wind direction is not constant
-                    final_df_param.loc[merged_df['ann_constant_wdir'] == 0, 'ann_constant'] = 0
-                    final_df_param.loc[merged_df['ann_constant_long_wdir'] == 0, 'ann_constant_long'] = 0
-                    final_df_param.loc[merged_df['ann_constant_frozen_wdir'] == 0, 'ann_constant_frozen'] = 0
+                    final_df_param.loc[merged_df["ann_constant_wdir"] == 0, "ann_constant"] = 0
+                    final_df_param.loc[merged_df["ann_constant_long_wdir"] == 0, "ann_constant_long"] = 0
+                    final_df_param.loc[merged_df["ann_constant_frozen_wdir"] == 0, "ann_constant_frozen"] = 0
 
             final_df_param = RawDataChecks.raw_data_suspicious_check(
                 final_df_param,
@@ -116,7 +116,7 @@ class ObcSqcCheck:
                 data_timestep,
                 time_window_median,
                 availability_threshold_median[i],
-                ann_no_median,
+                ann_unident_spk,
                 ann_no_datum,
                 ann_invalid_datum,
             )
@@ -134,6 +134,7 @@ class ObcSqcCheck:
                 time_window_median,
                 minute_cntrl_thresholds[i],
                 ann_invalid_datum,
+                ann_unident_spk,
                 pr_int,
                 preprocess_time_window,
             )
@@ -150,7 +151,7 @@ class ObcSqcCheck:
                     "ann_obc",
                     "ann_jump_couples",
                     "ann_invalid_datum",
-                    "ann_no_median",
+                    "ann_unidentified_spike",
                     "ann_no_datum",
                     "ann_constant",
                     "ann_constant_long",

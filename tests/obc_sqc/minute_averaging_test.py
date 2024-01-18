@@ -13,10 +13,10 @@ averaging_period_dict: dict[str, int] = {
 }
 
 availability_threshold_dict: dict[str, float] = {
-    "temperature": 0.33,
-    "wind_speed": 0.33,
-    "wind_direction": 0.33,
-    "precipitation_accumulated": 0.33,
+    "temperature": 0.25,
+    "wind_speed": 0.25,
+    "wind_direction": 0.25,
+    "precipitation_accumulated": 0.25,
 }
 
 availability_threshold_median_dict: dict[str, float] = {
@@ -84,6 +84,7 @@ class TestMinuteAveraging:
         """
         time_window_median: int = 10
         ann_invalid_datum: int = 4
+        ann_unident_spk: int = 2
         pr_int: float = 0.254
         preprocess_time_window: int = 360
 
@@ -96,6 +97,7 @@ class TestMinuteAveraging:
             time_window_median,
             control_threshold,
             ann_invalid_datum,
+            ann_unident_spk,
             pr_int,
             preprocess_time_window,
         )[1]
@@ -154,6 +156,7 @@ class TestMinuteAveraging:
         """
         time_window_median: int = 10
         ann_invalid_datum: int = 4
+        ann_unident_spk: int = 2
         pr_int: float = 0.254
         preprocess_time_window: int = 360
 
@@ -167,6 +170,7 @@ class TestMinuteAveraging:
                 time_window_median,
                 control_threshold,
                 ann_invalid_datum,
+                ann_unident_spk,
                 pr_int,
                 preprocess_time_window,
             )
@@ -215,6 +219,7 @@ class TestMinuteAveraging:
         """
         time_window_median: int = 10
         ann_invalid_datum: int = 4
+        ann_unident_spk: int = 2
         pr_int: float = 0.254
         preprocess_time_window: int = 360
 
@@ -228,6 +233,7 @@ class TestMinuteAveraging:
                 time_window_median,
                 control_threshold,
                 ann_invalid_datum,
+                ann_unident_spk,
                 pr_int,
                 preprocess_time_window,
             )
@@ -276,6 +282,7 @@ class TestMinuteAveraging:
         """
         time_window_median: int = 10
         ann_invalid_datum: int = 4
+        ann_unident_spk: int = 2
         pr_int: float = 0.254
         preprocess_time_window: int = 360
 
@@ -289,6 +296,7 @@ class TestMinuteAveraging:
                 time_window_median,
                 control_threshold,
                 ann_invalid_datum,
+                ann_unident_spk,
                 pr_int,
                 preprocess_time_window,
             )
