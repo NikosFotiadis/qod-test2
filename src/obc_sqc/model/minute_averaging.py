@@ -377,9 +377,7 @@ class MinuteAveraging:
         ].shift(1)
 
         minute_averaging.loc[
-            (mask_diff_larger_than_threshold & mask_prev_val_bigger_than_curr)
-            .shift(-1)
-            .fillna(False),
+            (mask_diff_larger_than_threshold & mask_prev_val_bigger_than_curr).shift(-1).fillna(False),
             "ann_invalid_datum",
         ] = ann_invalid_datum
         minute_averaging.loc[
