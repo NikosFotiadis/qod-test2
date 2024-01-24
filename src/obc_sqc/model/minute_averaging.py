@@ -357,40 +357,41 @@ class MinuteAveraging:
         minute_averaging["ann_unidentified_change"] = 0
 
         temp: pd.DataFrame = minute_averaging[f"{parameter}_avg"]
-        temp_median_diff: pd.DataFrame = minute_averaging["median_diff_abs"]
-        minute_averaging = minute_averaging.reset_index()
+        temp_diff: pd.DataFrame = temp.diff().abs()
 
-        # check if difference is larger than the defined threshold
-        for i in range(1, len(temp)):
-            prev_val: float = temp[i - 1] if i > 0 else 0
-            curr_val: float = temp[i]
-            prev_or_cur_val_is_missing: bool = prev_val is pd.NA or curr_val is pd.NA
+        minute_averaging["ann_jump_couples"] = 0
+        minute_averaging["ann_invalid_datum"] = 0
 
-            # check if difference of consecutive average values is larger than control_threshold
+        # check if difference of consecutive average values is larger than control_threshold
+        mask_diff_larger_than_threshold = temp_diff > control_threshold
+        minute_averaging.loc[mask_diff_larger_than_threshold, "ann_jump_couples"] = 1
+        minute_averaging.loc[mask_diff_larger_than_threshold.shift(-1).fillna(False), "ann_jump_couples"] = 1
 
-            diff: float = abs(temp[i] - temp[i - 1]) if temp[i] is not pd.NA and temp[i - 1] is not pd.NA else pd.NA
+        # in case the difference is large, check which abs(value-median) of the couple of observations
+        # is larger and annotate with "ann_invalid_datum"
+        mask_prev_val_bigger_than_curr = (
+            minute_averaging["median_diff_abs"].shift(1) > minute_averaging["median_diff_abs"]
+        )
+        mask_curr_val_bigger_than_prev = minute_averaging["median_diff_abs"] > minute_averaging[
+            "median_diff_abs"
+        ].shift(1)
 
-            if not prev_or_cur_val_is_missing:
-                if diff > control_threshold:
-                    minute_averaging.loc[i, "ann_jump_couples"] = 1
-                    minute_averaging.loc[i - 1, "ann_jump_couples"] = 1
+        minute_averaging.loc[
+            (mask_diff_larger_than_threshold & mask_prev_val_bigger_than_curr)
+            .shift(-1)
+            .fillna(False),
+            "ann_invalid_datum",
+        ] = ann_invalid_datum
+        minute_averaging.loc[
+            (mask_diff_larger_than_threshold & mask_curr_val_bigger_than_prev),
+            "ann_invalid_datum",
+        ] = ann_invalid_datum
 
-                    # in case the difference is large,
-                    # check which abs(value-median) of the couple of observations
-                    # is larger and annotate
-                    if prev_val > curr_val and temp_median_diff[i - 1] is not pd.NA:
-                        minute_averaging.loc[i - 1, "ann_invalid_datum"] = ann_invalid_datum
-                    elif curr_val > prev_val and temp_median_diff[i] is not pd.NA:
-                        minute_averaging.loc[i, "ann_invalid_datum"] = ann_invalid_datum
-
-            else:
-                minute_averaging.loc[i, "ann_jump_couples"] = 0
-                minute_averaging.loc[i, "ann_invalid_datum"] = 0
-
-            # we also annotate a value as invalid if it's equal to a previous faulty measurement
-            if not prev_or_cur_val_is_missing:
-                if temp[i] == temp[i - 1] and minute_averaging["ann_invalid_datum"][i - 1] == ann_invalid_datum:
-                    minute_averaging.loc[i, "ann_invalid_datum"] = ann_invalid_datum
+        # we also annotate a value as invalid if it's equal to a previous faulty measurement
+        mask_invalid_equal_to_prev = (temp == temp.shift(1)) & (
+            minute_averaging["ann_invalid_datum"].shift(1) == ann_invalid_datum
+        )
+        minute_averaging.loc[mask_invalid_equal_to_prev, "ann_invalid_datum"] = ann_invalid_datum
 
         no_median_mask = minute_averaging["rolling_median"].isna()
 
@@ -398,8 +399,6 @@ class MinuteAveraging:
         minute_averaging.loc[
             no_median_mask & (minute_averaging["ann_jump_couples"] == 1), "ann_unidentified_change"
         ] = ann_unident_spk
-
-        minute_averaging = minute_averaging.set_index("utc_datetime")
 
         return minute_averaging
 
@@ -572,7 +571,7 @@ class MinuteAveraging:
 
         Args:
         ----
-            fnl_df (pd.DataFrame): the output of check_for_constant_data(), which is a dataframe with a fixed temporal
+            fnl_df (pd.DataFrame): the output of constant_data_check(), which is a dataframe with a fixed temporal
                                     resolution
             parameter (str): the name of the examined parameter e.g. temperature, humidity, wind speed etc.
             averaging_period (int): the desired period for averaging, e.g. we want to calculate 2-minute averages

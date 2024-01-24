@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import pytest
 
+from typing import Callable
+
 
 def get_time_normalized_temperature_df() -> pd.DataFrame:
     """Reads the time normalized dataframe from the parquet file and returns it.
@@ -53,7 +55,7 @@ def get_time_normalized_temperature_df() -> pd.DataFrame:
 
 
 def get_time_normalized_temperature_nan_df() -> pd.DataFrame:
-    """Reads the time normalized dataframe from the parquet file and returns it.
+    """Creates the time normalized dataframe filled with nans and returns it.
 
     Args:
     ----
@@ -209,7 +211,7 @@ def get_time_normalized_wind_speed_df() -> pd.DataFrame:
 
 
 def get_time_normalized_wind_speed_nan_df() -> pd.DataFrame:
-    """Reads the time normalized dataframe from the parquet file and returns it.
+    """Creates the time normalized dataframe filled with nans and returns it.
 
     Args:
     ----
@@ -371,7 +373,7 @@ def get_time_normalized_wind_direction_df() -> pd.DataFrame:
 
 
 def get_time_normalized_wind_direction_nan_df() -> pd.DataFrame:
-    """Reads the time normalized dataframe from the parquet file and returns it.
+    """Creates the time normalized dataframe filled with nans and returns it.
 
     Args:
     ----
@@ -545,7 +547,7 @@ def get_time_normalized_precipitation_accumulated_df() -> pd.DataFrame:
 
 
 def get_time_normalized_precipitation_accumulated_nan_df() -> pd.DataFrame:
-    """Reads the time normalized dataframe from the parquet file and returns it.
+    """Creates the time normalized dataframe filled with nans and returns it.
 
     Args:
     ----
@@ -859,7 +861,7 @@ def time_normalized_df(request: pytest.FixtureRequest) -> pd.DataFrame:
     """
     param_value: str = request.param
 
-    functions_dict = {
+    functions_dict: dict[str, Callable] = {
         "temperature": get_time_normalized_temperature_df,
         "wind_speed": get_time_normalized_wind_speed_df,
         "wind_direction": get_time_normalized_wind_direction_df,
@@ -888,7 +890,7 @@ def time_normalized_nan_df(request: pytest.FixtureRequest) -> pd.DataFrame:
     """
     param_value: str = request.param
 
-    functions_dict = {
+    functions_dict: dict[str, Callable] = {
         "temperature": get_time_normalized_temperature_nan_df,
         "wind_speed": get_time_normalized_wind_speed_nan_df,
         "wind_direction": get_time_normalized_wind_direction_nan_df,
@@ -917,7 +919,7 @@ def time_normalized_empty_df(request: pytest.FixtureRequest) -> pd.DataFrame:
     """
     param_value: str = request.param
 
-    functions_dict = {
+    functions_dict: dict[str, Callable] = {
         "temperature": get_time_normalized_temperature_empty_df,
         "wind_speed": get_time_normalized_wind_speed_empty_df,
         "wind_direction": get_time_normalized_wind_direction_empty_df,
@@ -946,7 +948,7 @@ def minute_averaging_df(request: pytest.FixtureRequest) -> pd.DataFrame:
     """
     param_value: str = request.param
 
-    functions_dict = {
+    functions_dict: dict[str, Callable] = {
         "temperature": get_minute_averaging_temperature_df,
         "wind_speed": get_minute_averaging_wind_speed_df,
         "wind_direction": get_minute_averaging_wind_direction_df,

@@ -42,7 +42,7 @@ class InitialParams:  # noqa: D101
             ignoring_period = 60
             start_timestamp = "18:00:00"
 
-            # This is the threshold used in the def "check_for_constant_data"
+            # This is the threshold used in the def "constant_data_check"
             # to exclude annotating data as constant when e.g., RH>95%
             rh_threshold = 95
             pr_int = 0.254  # This is the rain gauge resolution [mm]
@@ -69,7 +69,7 @@ class InitialParams:  # noqa: D101
             # pr_hourly_availability = 0.85  # This is the availability threshold for precipitation in the hourly level
 
             # jump thresholds for checking raw data
-            raw_control_thresholds = [5, 2, np.nan, 20, 0.3, 97600, np.nan]
+            raw_control_thresholds = [5, 2, np.nan, 20, 0.5, 97600, np.nan]
 
             # jump thresholds for checking averaged data
             minute_control_thresholds = [10, 3, np.nan, 10, 0.5, 97600, np.nan]
@@ -120,7 +120,7 @@ class InitialParams:  # noqa: D101
             # This is used in constant check [seconds]
             ignoring_period = 180
 
-            # This is the threshold used in the def "check_for_constant_data"
+            # This is the threshold used in the def "constant_data_check"
             # to exclude annotating data as constant when e.g., RH>95%
             rh_threshold = 95
 

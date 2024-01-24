@@ -45,7 +45,7 @@ def get_minute_averaging_temperature_df() -> pd.DataFrame:
 
 
 def get_minute_averaging_temperature_nan_df() -> pd.DataFrame:
-    """Reads the nan-filled minute averaged dataframe from the parquet file and returns it.
+    """Creates the minute averaged dataframe filled with nans and returns it.
 
     Args:
     ----
@@ -59,31 +59,6 @@ def get_minute_averaging_temperature_nan_df() -> pd.DataFrame:
     start_date: str = "2023-10-30 00:00:00"
     end_date: str = "2023-10-30 23:59:00"
     date_range: pd.DatetimeIndex = pd.date_range(start=start_date, end=end_date, freq="T")
-
-    # Specify the column names
-    columns: list[str] = [
-        "temperature_avg",
-        "temperature_avg_corrected",
-        "faulty_rewards",
-        "num_faulty",
-        "num_total_slots",
-        "valid_percentage",
-        "valid_percentage_rewards",
-        "rolling_median",
-        "diff_abs",
-        "median_diff_abs",
-        "ann_jump_couples",
-        "ann_invalid_datum",
-        "ann_unidentified_change",
-        "ann_all_from_raw",
-        "ann_all_from_raw_rewards",
-        "ann_total",
-        "ann_total_rewards",
-        "annotation",
-    ]
-
-    # Create an empty DataFrame with specified columns
-    df: pd.DataFrame = pd.DataFrame(index=date_range, columns=columns, data=np.nan)
 
     dtypes: dict[str, str] = {
         "temperature_avg": "float64",
@@ -105,6 +80,10 @@ def get_minute_averaging_temperature_nan_df() -> pd.DataFrame:
         "ann_total_rewards": "float64",
         "annotation": "float64",
     }
+
+    # Create an empty DataFrame with specified columns
+    df: pd.DataFrame = pd.DataFrame(index=date_range, columns=list(dtypes.keys()), data=np.nan)
+
     df = df.astype(dtypes)
 
     return df
@@ -121,31 +100,6 @@ def get_minute_averaging_temperature_empty_df() -> pd.DataFrame:
     -------
         pd.DataFrame: the created DataFrame
     """
-    # Specify the column names
-    columns: list[str] = [
-        "temperature_avg",
-        "temperature_avg_corrected",
-        "faulty_rewards",
-        "num_faulty",
-        "num_total_slots",
-        "valid_percentage",
-        "valid_percentage_rewards",
-        "rolling_median",
-        "diff_abs",
-        "median_diff_abs",
-        "ann_jump_couples",
-        "ann_invalid_datum",
-        "ann_unidentified_change",
-        "ann_all_from_raw",
-        "ann_all_from_raw_rewards",
-        "ann_total",
-        "ann_total_rewards",
-        "annotation",
-    ]
-
-    # Create an empty DataFrame with specified columns
-    df: pd.DataFrame = pd.DataFrame(columns=columns, index=pd.DatetimeIndex([]))
-
     dtypes: dict[str, str] = {
         "temperature_avg": "object",
         "temperature_avg_corrected": "float64",
@@ -166,6 +120,10 @@ def get_minute_averaging_temperature_empty_df() -> pd.DataFrame:
         "ann_total_rewards": "int64",
         "annotation": "object",
     }
+
+    # Create an empty DataFrame with specified columns
+    df: pd.DataFrame = pd.DataFrame(columns=list(dtypes.keys()), index=pd.DatetimeIndex([]))
+
     df = df.astype(dtypes)
 
     return df
@@ -250,7 +208,7 @@ def get_minute_averaging_wind_speed_df() -> pd.DataFrame:
 
 
 def get_minute_averaging_wind_speed_nan_df() -> pd.DataFrame:
-    """Reads the nan-filled minute averaged dataframe from the parquet file and returns it.
+    """Creates the minute averaged dataframe filled with nans and returns it.
 
     Args:
     ----
@@ -264,35 +222,6 @@ def get_minute_averaging_wind_speed_nan_df() -> pd.DataFrame:
     start_date: str = "2023-10-30 00:00:00"
     end_date: str = "2023-10-30 23:59:00"
     date_range: pd.DatetimeIndex = pd.date_range(start=start_date, end=end_date, freq="T")
-
-    # Specify the column names
-    columns: list[str] = [
-        "wind_direction_avg",
-        "wind_speed_avg",
-        "u",
-        "v",
-        "num_faulty",
-        "num_total_slots",
-        "valid_percentage",
-        "valid_percentage_rewards",
-        "faulty_rewards",
-        "wind_spd_avg_corrected",
-        "wind_dir_avg_corrected",
-        "rolling_median",
-        "diff_abs",
-        "median_diff_abs",
-        "ann_jump_couples",
-        "ann_invalid_datum",
-        "ann_unidentified_change",
-        "ann_all_from_raw",
-        "ann_all_from_raw_rewards",
-        "ann_total",
-        "ann_total_rewards",
-        "annotation",
-    ]
-
-    # Create an empty DataFrame with specified columns
-    df: pd.DataFrame = pd.DataFrame(index=date_range, columns=columns, data=np.nan)
 
     dtypes: dict[str, str] = {
         "wind_direction_avg": "float64",
@@ -318,6 +247,10 @@ def get_minute_averaging_wind_speed_nan_df() -> pd.DataFrame:
         "ann_total_rewards": "float64",
         "annotation": "float64",
     }
+
+    # Create an empty DataFrame with specified columns
+    df: pd.DataFrame = pd.DataFrame(index=date_range, columns=list(dtypes.keys()), data=np.nan)
+
     df = df.astype(dtypes)
 
     return df
@@ -334,35 +267,6 @@ def get_minute_averaging_wind_speed_empty_df() -> pd.DataFrame:
     -------
         pd.DataFrame: the created DataFrame
     """
-    # Specify the column names
-    columns: list[str] = [
-        "wind_direction_avg",
-        "wind_speed_avg",
-        "u",
-        "v",
-        "num_faulty",
-        "num_total_slots",
-        "valid_percentage",
-        "valid_percentage_rewards",
-        "faulty_rewards",
-        "wind_spd_avg_corrected",
-        "wind_dir_avg_corrected",
-        "rolling_median",
-        "diff_abs",
-        "median_diff_abs",
-        "ann_jump_couples",
-        "ann_invalid_datum",
-        "ann_unidentified_change",
-        "ann_all_from_raw",
-        "ann_all_from_raw_rewards",
-        "ann_total",
-        "ann_total_rewards",
-        "annotation",
-    ]
-
-    # Create an empty DataFrame with specified columns
-    df: pd.DataFrame = pd.DataFrame(columns=columns, index=pd.DatetimeIndex([]))
-
     dtypes: dict[str, str] = {
         "wind_direction_avg": "float64",
         "wind_speed_avg": "object",
@@ -387,6 +291,10 @@ def get_minute_averaging_wind_speed_empty_df() -> pd.DataFrame:
         "ann_total_rewards": "int64",
         "annotation": "object",
     }
+
+    # Create an empty DataFrame with specified columns
+    df: pd.DataFrame = pd.DataFrame(columns=list(dtypes.keys()), index=pd.DatetimeIndex([]))
+
     df = df.astype(dtypes)
 
     return df
@@ -475,7 +383,7 @@ def get_minute_averaging_wind_direction_df() -> pd.DataFrame:
 
 
 def get_minute_averaging_wind_direction_nan_df() -> pd.DataFrame:
-    """Reads the nan-filled minute averaged dataframe from the parquet file and returns it.
+    """Creates the minute averaged dataframe filled with nans and returns it.
 
     Args:
     ----
@@ -489,35 +397,6 @@ def get_minute_averaging_wind_direction_nan_df() -> pd.DataFrame:
     start_date: str = "2023-10-30 00:00:00"
     end_date: str = "2023-10-30 23:59:00"
     date_range: pd.DatetimeIndex = pd.date_range(start=start_date, end=end_date, freq="T")
-
-    # Specify the column names
-    columns: list[str] = [
-        "wind_direction_avg",
-        "wind_speed_avg",
-        "u",
-        "v",
-        "num_faulty",
-        "num_total_slots",
-        "valid_percentage",
-        "valid_percentage_rewards",
-        "faulty_rewards",
-        "wind_spd_avg_corrected",
-        "wind_dir_avg_corrected",
-        "rolling_median_minute",
-        "diff_abs",
-        "median_diff_abs",
-        "ann_jump_couples",
-        "ann_invalid_datum",
-        "ann_unidentified_change",
-        "ann_all_from_raw",
-        "ann_all_from_raw_rewards",
-        "ann_total",
-        "ann_total_rewards",
-        "annotation",
-    ]
-
-    # Create an empty DataFrame with specified columns
-    df: pd.DataFrame = pd.DataFrame(index=date_range, columns=columns, data=np.nan)
 
     dtypes: dict[str, str] = {
         "wind_direction_avg": "float64",
@@ -543,6 +422,10 @@ def get_minute_averaging_wind_direction_nan_df() -> pd.DataFrame:
         "ann_total_rewards": "float64",
         "annotation": "float64",
     }
+
+    # Create an empty DataFrame with specified columns
+    df: pd.DataFrame = pd.DataFrame(index=date_range, columns=list(dtypes.keys()), data=np.nan)
+
     df = df.astype(dtypes)
 
     return df
@@ -559,35 +442,6 @@ def get_minute_averaging_wind_direction_empty_df() -> pd.DataFrame:
     -------
         pd.DataFrame: the created DataFrame
     """
-    # Specify the column names
-    columns: list[str] = [
-        "wind_direction_avg",
-        "wind_speed_avg",
-        "u",
-        "v",
-        "num_faulty",
-        "num_total_slots",
-        "valid_percentage",
-        "valid_percentage_rewards",
-        "faulty_rewards",
-        "wind_spd_avg_corrected",
-        "wind_dir_avg_corrected",
-        "rolling_median_minute",
-        "diff_abs",
-        "median_diff_abs",
-        "ann_jump_couples",
-        "ann_invalid_datum",
-        "ann_unidentified_change",
-        "ann_all_from_raw",
-        "ann_all_from_raw_rewards",
-        "ann_total",
-        "ann_total_rewards",
-        "annotation",
-    ]
-
-    # Create an empty DataFrame with specified columns
-    df: pd.DataFrame = pd.DataFrame(columns=columns, index=pd.DatetimeIndex([]))
-
     dtypes: dict[str, str] = {
         "wind_direction_avg": "float64",
         "wind_speed_avg": "object",
@@ -612,6 +466,10 @@ def get_minute_averaging_wind_direction_empty_df() -> pd.DataFrame:
         "ann_total_rewards": "int64",
         "annotation": "object",
     }
+
+    # Create an empty DataFrame with specified columns
+    df: pd.DataFrame = pd.DataFrame(columns=list(dtypes.keys()), index=pd.DatetimeIndex([]))
+
     df = df.astype(dtypes)
 
     return df
@@ -696,7 +554,7 @@ def get_minute_averaging_precipitation_accumulated_df() -> pd.DataFrame:
 
 
 def get_minute_averaging_precipitation_accumulated_nan_df() -> pd.DataFrame:
-    """Reads the nan-filled minute averaged dataframe from the parquet file and returns it.
+    """Creates the minute averaged dataframe filled with nans and returns it.
 
     Args:
     ----
@@ -710,31 +568,6 @@ def get_minute_averaging_precipitation_accumulated_nan_df() -> pd.DataFrame:
     start_date: str = "2023-10-30 00:00:00"
     end_date: str = "2023-10-30 23:59:00"
     date_range: pd.DatetimeIndex = pd.date_range(start=start_date, end=end_date, freq="T")
-
-    # Specify the column names
-    columns: list[str] = [
-        "precipitation_accumulated_avg",
-        "precipitation_accumulated_avg_corrected",
-        "faulty_rewards",
-        "num_faulty",
-        "num_total_slots",
-        "valid_percentage",
-        "valid_percentage_rewards",
-        "rolling_median_minute",
-        "diff_abs",
-        "median_diff_abs",
-        "ann_jump_couples",
-        "ann_invalid_datum",
-        "ann_unidentified_change",
-        "ann_all_from_raw",
-        "ann_all_from_raw_rewards",
-        "ann_total",
-        "ann_total_rewards",
-        "annotation",
-    ]
-
-    # Create an empty DataFrame with specified columns
-    df: pd.DataFrame = pd.DataFrame(index=date_range, columns=columns, data=np.nan)
 
     dtypes: dict[str, str] = {
         "precipitation_accumulated_avg": "float64",
@@ -756,6 +589,10 @@ def get_minute_averaging_precipitation_accumulated_nan_df() -> pd.DataFrame:
         "ann_total_rewards": "float64",
         "annotation": "float64",
     }
+
+    # Create an empty DataFrame with specified columns
+    df: pd.DataFrame = pd.DataFrame(index=date_range, columns=list(dtypes.keys()), data=np.nan)
+
     df = df.astype(dtypes)
 
     return df
@@ -772,31 +609,6 @@ def get_minute_averaging_precipitation_accumulated_empty_df() -> pd.DataFrame:
     -------
         pd.DataFrame: the created DataFrame
     """
-    # Specify the column names
-    columns: list[str] = [
-        "precipitation_accumulated_avg",
-        "precipitation_accumulated_avg_corrected",
-        "faulty_rewards",
-        "num_faulty",
-        "num_total_slots",
-        "valid_percentage",
-        "valid_percentage_rewards",
-        "rolling_median_minute",
-        "diff_abs",
-        "median_diff_abs",
-        "ann_jump_couples",
-        "ann_invalid_datum",
-        "ann_unidentified_change",
-        "ann_all_from_raw",
-        "ann_all_from_raw_rewards",
-        "ann_total",
-        "ann_total_rewards",
-        "annotation",
-    ]
-
-    # Create an empty DataFrame with specified columns
-    df: pd.DataFrame = pd.DataFrame(columns=columns, index=pd.DatetimeIndex([]))
-
     dtypes: dict[str, str] = {
         "precipitation_accumulated_avg": "float64",
         "precipitation_accumulated_avg_corrected": "float64",
@@ -817,6 +629,10 @@ def get_minute_averaging_precipitation_accumulated_empty_df() -> pd.DataFrame:
         "ann_total_rewards": "int64",
         "annotation": "object",
     }
+
+    # Create an empty DataFrame with specified columns
+    df: pd.DataFrame = pd.DataFrame(columns=list(dtypes.keys()), index=pd.DatetimeIndex([]))
+
     df = df.astype(dtypes)
 
     return df
@@ -984,22 +800,6 @@ def hour_averaging_precipitation_accumulated_empty_df() -> pd.DataFrame:
     -------
         pd.DataFrame: the created DataFrame
     """
-    # Specify the column names
-    columns: list[str] = [
-        "precipitation_accumulated_avg",
-        "num_time_slots",
-        "num_hourly_faulty",
-        "num_hourly_faulty_rewards",
-        "valid_percentage",
-        "ann_total_hour",
-        "valid_percentage_rewards",
-        "ann_total_hour_rewards",
-        "annotation",
-    ]
-
-    # Create an empty DataFrame with specified columns
-    df: pd.DataFrame = pd.DataFrame(columns=columns, index=pd.DatetimeIndex([]))
-
     dtypes: dict[str, str] = {
         "precipitation_accumulated_avg": "float64",
         "num_time_slots": "int64",
@@ -1011,6 +811,10 @@ def hour_averaging_precipitation_accumulated_empty_df() -> pd.DataFrame:
         "ann_total_hour_rewards": "int64",
         "annotation": "object",
     }
+
+    # Create an empty DataFrame with specified columns
+    df: pd.DataFrame = pd.DataFrame(columns=list(dtypes.keys()), index=pd.DatetimeIndex([]))
+
     df = df.astype(dtypes)
 
     return df

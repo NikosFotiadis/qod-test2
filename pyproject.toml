@@ -73,6 +73,7 @@ pytest-github-actions-annotate-failures = "0.1.7"
 # CLI scripts
 [tool.poetry.scripts]
 local = "src.obc_sqc.iface.direct_model_inference:main"
+register = "src.obc_sqc.iface.register_model:main"
 file = "src.obc_sqc.iface.file_model_inference:main"
 
 [build-system]

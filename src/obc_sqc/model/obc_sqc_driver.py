@@ -77,10 +77,9 @@ class ObcSqcCheck:
                 # Shift all rows by 1 slot
                 final_df["date"] = pd.to_datetime(final_df["utc_datetime"]) + pd.Timedelta(seconds=data_timestep)
 
-                final_df_param = ConstantDataCheck.check_for_constant_data(
+                final_df_param = ConstantDataCheck.constant_data_check(
                     final_df,
                     parameter,
-                    data_timestep,
                     time_window_constant[i],
                     ann_constant,
                     ann_constant_frozen,
@@ -185,7 +184,7 @@ class ObcSqcCheck:
             # assign the result to a new column, named "hourly_annotation", belonging to the "hour_averaging" key
             # of the results_mapping[parameter]
             df_to_modify: pd.DataFrame = results_mapping[parameter]["hour_averaging"]
-            df_to_modify["hourly_annotation"] = hourly_annotation.apply(lambda x: x[0])
+            df_to_modify["hourly_annotation"] = hourly_annotation.apply(lambda x: x[0] + x[1])
             results_mapping[parameter]["hour_averaging"] = df_to_modify
 
         # Aggregate results

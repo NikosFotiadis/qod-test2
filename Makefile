@@ -81,7 +81,7 @@ clean: ## Clean intermediate files
 .PHONY: test
 test: ## Test the code with pytest
 	@echo "🚀 Testing code: Running pytest"
-	@poetry run pytest tests/obc_sqc/$(file) -rP --cov --cov-config=pyproject.toml --cov-report=xml
+	@poetry run pytest tests/obc_sqc/$(file) -rP --cov --cov-config=pyproject.toml --cov-report=html
 
 .PHONY: build
 build: clean-build ## Build wheel file using poetry
@@ -114,15 +114,15 @@ docker-clean:	## Delete docker image
 profile-inference: ## Run the code with scalene profiling
 	mkdir -p profiling
 	@echo "🚀 Running code with profiling"
-	@poetry run python -m scalene --outfile scalene.html --html src/obc_sqc/iface/direct_model_inference.py --device_id $(device_id) --date $(date)
+	@poetry run python -m scalene --outfile profiling/scalene.html --html src/obc_sqc/iface/direct_model_inference.py --device_id $(device_id) --date $(date)
 
 .PHONY: profile-inference-cprofile
 profile-inference-cprofile: ## Run the code with cProfiler
 	mkdir -p profiling
 	@echo "🚀 Running code with profiling"
-	@poetry run python -m cProfile -o cprofile.pstats src/obc_sqc/iface/direct_model_inference.py --device_id $(device_id) --date $(date)
+	@poetry run python -m cProfile -o profiling/cprofile.pstats src/obc_sqc/iface/direct_model_inference.py --device_id $(device_id) --date $(date)
 
 .PHONY: profile-inference-cprofile-visualize
 profile-inference-cprofile-visualize: ## Visualize cProfiler output
-	gprof2dot -f pstats cprofile.pstats | dot -Tpng -o output.png || true # Ignore errors since it requires OS installation of graphviz
-	snakeviz cprofile.pstats
+	gprof2dot -f pstats profiling/cprofile.pstats | dot -Tpng -o profiling/cprofile.png || true # Ignore errors since it requires OS installation of graphviz
+	snakeviz profiling/cprofile.pstats
