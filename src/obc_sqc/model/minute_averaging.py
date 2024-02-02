@@ -453,7 +453,11 @@ class MinuteAveraging:
 
         # calculate the percentage of valid/available data within averaging_period
         val_perc_rew = minute_averaging.apply(
-            lambda x: ((x["num_total_slots"] - x["faulty_rewards"]) * 100) / x["num_total_slots"],
+            lambda x: (
+                100
+                if (x["num_total_slots"] - x["faulty_rewards"]) / x["num_total_slots"] > availability_threshold
+                else ((x["num_total_slots"] - x["faulty_rewards"]) * 100) / x["num_total_slots"]
+            ),
             axis=1,
         )
 

@@ -144,13 +144,13 @@ class InitialParams:  # noqa: D101
             # within a certain period is available averaging or rewarding is not possible
             availability_threshold_median = [0.67, 0.67, 0.75, 0.75, 0.67, 0.67, np.nan]
             availability_threshold_m = [
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
+                0.9,
+                0.9,
+                0.9,
+                0.9,
+                0.9,
+                0.9,
+                0.9,
             ]  # this is not used in WS2000, it's given only for not breaking the processes
             availability_threshold_h = [
                 0.67,

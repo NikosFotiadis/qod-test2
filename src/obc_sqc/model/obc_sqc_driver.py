@@ -238,7 +238,7 @@ class ObcSqcCheck:
         total_rewards: float = ObcSqcCheck.calculate_daily_score(
             parameters_for_testing, results_mapping, flattened_results
         )
-        qod_version: str = "1.0.5"
+        qod_version: str = "1.0.6"
 
         result_df["qod_score"] = total_rewards
         result_df["hourly_score"] = result_df[[f"{x}_score" for x in results_mapping]].mean(axis=1)
