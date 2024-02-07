@@ -69,7 +69,7 @@ class InitialParams:  # noqa: D101
             # pr_hourly_availability = 0.85  # This is the availability threshold for precipitation in the hourly level
 
             # jump thresholds for checking raw data
-            raw_control_thresholds = [5, 2, np.nan, 20, 0.5, 97600, np.nan]
+            raw_control_thresholds = [5, 2, np.nan, 20, 0.8, 97600, np.nan]
 
             # jump thresholds for checking averaged data
             minute_control_thresholds = [10, 3, np.nan, 10, 0.5, 97600, np.nan]
@@ -165,7 +165,7 @@ class InitialParams:  # noqa: D101
             # pr_hourly_availability = 0.85  # This is the availability threshold for precipitation in the hourly level
 
             # jump thresholds for checking raw data
-            raw_control_thresholds = [10, 3, 10, 10, 0.5, 97600, np.nan]
+            raw_control_thresholds = [10, 3, np.nan, 10, 0.8, 97600, np.nan]
 
             # jump thresholds for checking averaged data
             minute_control_thresholds = [
