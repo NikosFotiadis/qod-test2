@@ -10,7 +10,7 @@ from obc_sqc.model.filling_ignoring_period import FillingIgnoringPeriod
 from obc_sqc.model.hour_averaging import HourAveraging
 from obc_sqc.model.initial_params import InitialParams
 from obc_sqc.model.minute_averaging import MinuteAveraging
-from obc_sqc.model.raw_data_checks import RawDataChecks
+from obc_sqc.model.raw_data_check import RawDataCheck
 from obc_sqc.schema.schema import SchemaDefinitions
 
 
@@ -108,7 +108,7 @@ class ObcSqcCheck:
                     final_df_param.loc[merged_df["ann_constant_long_wdir"] == 0, "ann_constant_long"] = 0
                     final_df_param.loc[merged_df["ann_constant_frozen_wdir"] == 0, "ann_constant_frozen"] = 0
 
-            final_df_param = RawDataChecks.raw_data_suspicious_check(
+            final_df_param = RawDataCheck.raw_data_suspicious_check(
                 final_df_param,
                 parameter,
                 raw_cntrl_thresholds[i],

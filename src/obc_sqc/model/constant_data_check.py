@@ -10,7 +10,7 @@ class ConstantDataCheck:
     """Functions for checking for constant data within a time window."""
 
     @staticmethod
-    def assign_first_value_in_window(window):
+    def assign_first_value_in_window(window: pd.Series) -> np.float64:
         """Return the first non-nan value present in the window, else 0.
 
         Args:
@@ -41,9 +41,7 @@ class ConstantDataCheck:
         if time_window_constant is np.nan:
             return time_window_constant
 
-        if "date" in fnl_df:
-            fnl_df = fnl_df.set_index("date")
-
+        fnl_df.index = pd.to_datetime(fnl_df.index)
         last_timestamp: pd.Timestamp = fnl_df.index[-1]
         start_timestamp: pd.Timestamp = last_timestamp - pd.Timedelta(minutes=time_window_constant)
 
@@ -69,7 +67,7 @@ class ConstantDataCheck:
         -------
             pd.DataFrame: The original dataframe, to which a column for constant data annotation is added
         """
-        fnl_df = fnl_df.set_index("date")
+        fnl_df.index = pd.to_datetime(fnl_df.index)
 
         # Create a column for the median in the rolling window
         fnl_df["median"] = (
@@ -84,7 +82,7 @@ class ConstantDataCheck:
         )
 
         # Filter rows based on conditions
-        condition: pd.DataFrame = (
+        condition: pd.Series = (
             (fnl_df["non_nan_count"] == time_window_const_as_row_count)  # all values non-nan
             & (fnl_df["unique_values"] == 1)  # a constant value across all elements
             & (fnl_df["median"] < rh_threshold)
@@ -118,12 +116,12 @@ class ConstantDataCheck:
         # annotation_condition_reversed=True
         fnl_df["ann_constant"] = (ann_constant * annotation_condition_reversed > 0).astype(int)[::-1]
 
-        fnl_df = fnl_df.reset_index(drop=False, names=["date"]).drop(["unique_values", "median"], axis=1)
+        fnl_df = fnl_df.drop(["unique_values", "median"], axis=1)
 
         return fnl_df
 
     @staticmethod
-    def prepare_wind_df_and_condition(fnl_df, time_window_const) -> Tuple[pd.DataFrame, pd.Series]:
+    def prepare_wind_df_and_condition(fnl_df: pd.DataFrame, time_window_const: int) -> Tuple[pd.DataFrame, pd.Series]:
         """Prepare the dataframe for wind constant data checking.
 
         This involves the operations that are common for both wind speed and wind direction
@@ -182,19 +180,18 @@ class ConstantDataCheck:
         -------
             pd.DataFrame: The original dataframe, to which columns for constant data annotation are added
         """
-        fnl_df = fnl_df.set_index("date")
-
         all_non_nan_constant: pd.Series
         fnl_df, all_non_nan_constant = ConstantDataCheck.prepare_wind_df_and_condition(fnl_df, time_window_const)
+        fnl_df.index = pd.to_datetime(fnl_df.index)
 
         # Filter rows based on conditions
-        temperature_lt_0: pd.DataFrame = fnl_df["median_temperature"] <= 0
-        temp_gt_0_hum_lt_85: pd.DataFrame = (fnl_df["median_temperature"] > 0) & (
+        temperature_lt_0: pd.Series = fnl_df["median_temperature"] <= 0
+        temp_gt_0_hum_lt_85: pd.Series = (fnl_df["median_temperature"] > 0) & (
             fnl_df["median_humidity"] < 85  # noqa: PLR2004
         )
 
-        all_non_nan_constant_temperature_lt_0: pd.DataFrame = all_non_nan_constant & temperature_lt_0
-        all_non_nan_constant_temp_gt_0_hum_lt_85: pd.DataFrame = all_non_nan_constant & temp_gt_0_hum_lt_85
+        all_non_nan_constant_temperature_lt_0: pd.Series = all_non_nan_constant & temperature_lt_0
+        all_non_nan_constant_temp_gt_0_hum_lt_85: pd.Series = all_non_nan_constant & temp_gt_0_hum_lt_85
 
         # all_non_nan_constant_temperature_lt_0 condition has higher priority in an if-else structure,
         # so it is applied later in the sequence.
@@ -206,7 +203,7 @@ class ConstantDataCheck:
         guard_datetime: pd.Timestamp = fnl_df.index[0] + pd.Timedelta(f"{time_window_const}min")
         fnl_df["result"] = fnl_df[fnl_df.index >= guard_datetime]["result"]
 
-        conditions: pd.DataFrame = all_non_nan_constant_temperature_lt_0 | all_non_nan_constant_temp_gt_0_hum_lt_85
+        conditions: pd.Series = all_non_nan_constant_temperature_lt_0 | all_non_nan_constant_temp_gt_0_hum_lt_85
         fnl_df["result"] = fnl_df.loc[conditions, "result"]
 
         fnl_df["ann_constant"] = (
@@ -216,9 +213,7 @@ class ConstantDataCheck:
             .apply(ConstantDataCheck.assign_first_value_in_window)
         )
 
-        ann_constant_decision: np.ndarray = np.where(
-            all_non_nan_constant_temp_gt_0_hum_lt_85, 0, fnl_df["ann_constant_frozen"]
-        )
+        ann_constant_decision = np.where(all_non_nan_constant_temp_gt_0_hum_lt_85, 0, fnl_df["ann_constant_frozen"])
         fnl_df["result"] = np.where(all_non_nan_constant_temperature_lt_0, ann_constant_frozen, ann_constant_decision)
 
         fnl_df["result"] = fnl_df[fnl_df.index >= guard_datetime]["result"]
@@ -231,7 +226,7 @@ class ConstantDataCheck:
             .apply(ConstantDataCheck.assign_first_value_in_window)
         )
 
-        fnl_df = fnl_df.reset_index(drop=False, names=["date"]).drop(
+        fnl_df = fnl_df.drop(
             ["median_temperature", "median_humidity", "non_nan_count", "unique_values", "result"], axis=1
         )
 
@@ -240,7 +235,7 @@ class ConstantDataCheck:
     @staticmethod
     def check_constant_wind_speed(
         fnl_df: pd.DataFrame, time_window_const: int, ann_constant: int, ann_constant_frozen: int
-    ):
+    ) -> pd.DataFrame:
         """Check for constant values in a small time window for wind speed data.
 
         Args:
@@ -255,8 +250,6 @@ class ConstantDataCheck:
         -------
             pd.DataFrame: The original dataframe, to which columns for constant data annotation are added
         """
-        fnl_df = fnl_df.set_index("date")
-
         # Count the number of rows for a day of the dataframe using as reference the last timestamp of the df
         time_window_const_as_row_count: int = ConstantDataCheck.get_number_of_rows_of_last_day(
             fnl_df, time_window_const
@@ -264,8 +257,9 @@ class ConstantDataCheck:
 
         all_non_nan_constant: pd.Series
         fnl_df, all_non_nan_constant = ConstantDataCheck.prepare_wind_df_and_condition(fnl_df, time_window_const)
+        fnl_df.index = pd.to_datetime(fnl_df.index)
 
-        temperature_lt_0: pd.DataFrame = fnl_df["median_temperature"] <= 0
+        temperature_lt_0: pd.Series = fnl_df["median_temperature"] <= 0
         wind_speed_all_0: pd.Series = (
             fnl_df["wind_speed_for_raw_check"]
             .eq(0)
@@ -273,9 +267,9 @@ class ConstantDataCheck:
             .sum()
             == time_window_const_as_row_count
         )
-        temperature_lt_0_wind_speed_all_0: pd.DataFrame = temperature_lt_0 & wind_speed_all_0
+        temperature_lt_0_wind_speed_all_0: pd.Series = temperature_lt_0 & wind_speed_all_0
 
-        temp_gt_0_hum_lt_85_wind_speed_all_0: pd.DataFrame = (
+        temp_gt_0_hum_lt_85_wind_speed_all_0: pd.Series = (
             (fnl_df["median_temperature"] > 0) & (fnl_df["median_humidity"] < 85) & wind_speed_all_0  # noqa: PLR2004
         )
 
@@ -288,10 +282,10 @@ class ConstantDataCheck:
         )
 
         all_non_nan_constant_wind_speed_all_not_0: pd.Series = all_non_nan_constant & wind_speed_all_not_0
-        all_non_nan_constant_temp_gt_0_hum_lt_85_wind_speed_all_0: pd.DataFrame = (
+        all_non_nan_constant_temp_gt_0_hum_lt_85_wind_speed_all_0: pd.Series = (
             all_non_nan_constant & temp_gt_0_hum_lt_85_wind_speed_all_0
         )
-        all_non_nan_constant_temperature_lt_0_wind_speed_all_0: pd.DataFrame = (
+        all_non_nan_constant_temperature_lt_0_wind_speed_all_0: pd.Series = (
             all_non_nan_constant & temperature_lt_0_wind_speed_all_0
         )
 
@@ -308,7 +302,7 @@ class ConstantDataCheck:
         guard_datetime: pd.Timestamp = fnl_df.index[0] + pd.Timedelta(f"{time_window_const}min")
         fnl_df["result"] = fnl_df[fnl_df.index >= guard_datetime]["result"]
 
-        conditions: pd.DataFrame = (
+        conditions: pd.Series = (
             all_non_nan_constant_temperature_lt_0_wind_speed_all_0
             | all_non_nan_constant_temp_gt_0_hum_lt_85_wind_speed_all_0
             | all_non_nan_constant_wind_speed_all_not_0
@@ -347,7 +341,7 @@ class ConstantDataCheck:
             .apply(ConstantDataCheck.assign_first_value_in_window)
         )
 
-        fnl_df = fnl_df.reset_index(drop=False, names=["date"]).drop(
+        fnl_df = fnl_df.drop(
             ["median_temperature", "median_humidity", "non_nan_count", "unique_values", "result"], axis=1
         )
 
@@ -367,7 +361,7 @@ class ConstantDataCheck:
         -------
             pd.DataFrame: The original dataframe, to which a column for constant data annotation is added
         """
-        fnl_df = fnl_df.set_index("date")
+        fnl_df.index = pd.to_datetime(fnl_df.index)
 
         # Create a column for the non-zero values in the rolling window
         fnl_df["non_zero"] = (
@@ -382,7 +376,7 @@ class ConstantDataCheck:
         )
 
         # Filter rows based on conditions
-        condition: pd.DataFrame = (
+        condition: pd.Series = (
             (fnl_df["non_nan_count"] == time_window_const_as_row_count)  # all non-nan
             & (fnl_df["unique_values"] == 1)  # all values constant
             & fnl_df["non_zero"]  # all values non-zero
@@ -397,9 +391,7 @@ class ConstantDataCheck:
         )
         fnl_df["ann_constant"] = (ann_constant * annotation_condition_reversed > 0).astype(int)[::-1]
 
-        fnl_df = fnl_df.reset_index(drop=False, names=["date"]).drop(
-            ["non_nan_count", "unique_values", "non_zero"], axis=1
-        )
+        fnl_df = fnl_df.drop(["non_nan_count", "unique_values", "non_zero"], axis=1)
 
         return fnl_df
 
@@ -417,7 +409,7 @@ class ConstantDataCheck:
         -------
             pd.DataFrame: The original dataframe, to which a column for constant data annotation is added
         """
-        fnl_df = fnl_df.set_index("date")
+        fnl_df.index = pd.to_datetime(fnl_df.index)
 
         # Count the number of rows for a day of the dataframe using as reference the last timestamp of the df
         time_window_const_as_row_count: int = ConstantDataCheck.get_number_of_rows_of_last_day(
@@ -438,7 +430,7 @@ class ConstantDataCheck:
         )
         fnl_df["ann_constant"] = (ann_constant * annotation_condition_reversed > 0).astype(int)[::-1]
 
-        fnl_df = fnl_df.reset_index(drop=False, names=["date"]).drop(["non_nan_count", "unique_values"], axis=1)
+        fnl_df = fnl_df.drop(["non_nan_count", "unique_values"], axis=1)
 
         return fnl_df
 
@@ -458,7 +450,7 @@ class ConstantDataCheck:
         -------
             pd.DataFrame: The original dataframe, to which a column for constant data annotation is added
         """
-        fnl_df = fnl_df.set_index("date")
+        fnl_df.index = pd.to_datetime(fnl_df.index)
 
         # Create a column for the non-NaN count in the rolling window
         fnl_df["non_nan_count"] = (
@@ -494,7 +486,7 @@ class ConstantDataCheck:
 
         fnl_df["ann_constant_long"] = (ann_constant_max * annotation_condition_reversed > 0).astype(int)[::-1]
 
-        fnl_df = fnl_df.reset_index(drop=False, names=["date"]).drop(["non_nan_count", "unique_values"], axis=1)
+        fnl_df = fnl_df.drop(["non_nan_count", "unique_values"], axis=1)
 
         return fnl_df
 
@@ -515,7 +507,7 @@ class ConstantDataCheck:
         -------
             pd.DataFrame: The original dataframe, to which a column for constant data annotation is added
         """
-        fnl_df = fnl_df.set_index("date")
+        fnl_df.index = pd.to_datetime(fnl_df.index)
 
         fnl_df["unique_values"] = (
             fnl_df[f"{parameter}_for_raw_check"]
@@ -543,7 +535,7 @@ class ConstantDataCheck:
         fnl_df["ann_constant_long"] = (ann_constant_max * annotation_condition_reversed > 0).astype(int)[::-1]
 
         # Reset index
-        fnl_df = fnl_df.reset_index(drop=False, names=["date"]).drop(["unique_values", "median"], axis=1)
+        fnl_df = fnl_df.drop(["unique_values", "median"], axis=1)
 
         return fnl_df
 
@@ -611,8 +603,6 @@ class ConstantDataCheck:
             .apply(lambda x: x.nunique())
         )
 
-        fnl_df = fnl_df.reset_index(drop=False, names=["date"])
-
         if parameter == "humidity":
             # perform the check within the small rolling time window
             fnl_df = ConstantDataCheck.check_constant_humidity_temperature(
@@ -659,5 +649,7 @@ class ConstantDataCheck:
         else:
             # perform the check within the small rolling time window
             fnl_df = ConstantDataCheck.check_constant_miscellaneous(fnl_df, time_window_constant, ann_constant)
+
+        fnl_df = fnl_df.reset_index(drop=False, names=["date"])
 
         return fnl_df

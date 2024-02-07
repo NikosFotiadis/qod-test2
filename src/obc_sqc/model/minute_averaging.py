@@ -3,7 +3,9 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from typing import Tuple
+from typing import Any, Tuple, Callable
+
+import functools
 
 from obc_sqc.model.annotation_utils import AnnotationUtils
 from obc_sqc.model.averaging_utils import AveragingUtils
@@ -131,21 +133,25 @@ class MinuteAveraging:
         ].round(2)
 
         # calculate the corrected wind speed and wind direction average, based on the annotations
+        function_correct_wind_speed_average: Callable[[pd.DataFrame], float] = functools.partial(
+            AveragingUtils.column_wind_speed_average_using_annotation,
+            availability_threshold=availability_threshold,
+            annotation_col="total_raw_annotation",
+        )
+
         minute_averaging["wind_spd_avg_corrected"] = fnl_df.groupby(
             pd.Grouper(key="utc_datetime", freq=f"{averaging_period}min")
-        ).apply(
-            AveragingUtils.column_wind_speed_average_using_annotation,
+        ).apply(function_correct_wind_speed_average)
+
+        function_correct_wind_direction_average: Callable[[pd.DataFrame], float] = functools.partial(
+            AveragingUtils.column_wind_direction_average_using_annotation,
             availability_threshold=availability_threshold,
             annotation_col="total_raw_annotation",
         )
 
         minute_averaging["wind_dir_avg_corrected"] = fnl_df.groupby(
             pd.Grouper(key="utc_datetime", freq=f"{averaging_period}min")
-        ).apply(
-            AveragingUtils.column_wind_direction_average_using_annotation,
-            availability_threshold=availability_threshold,
-            annotation_col="total_raw_annotation",
-        )
+        ).apply(function_correct_wind_direction_average)
 
         return minute_averaging
 
@@ -265,11 +271,15 @@ class MinuteAveraging:
 
         # calculate average after removing faulty measurements
         # and only if >availability_threshold of the data is available
-        corr_avg: pd.Series = fnl_df.groupby(pd.Grouper(key="utc_datetime", freq=f"{averaging_period}min")).apply(
+        function_correct_average_using_annotation: Callable[[pd.DataFrame], float] = functools.partial(
             AveragingUtils.column_average_using_annotation,
             column=parameter,
             availability_threshold=availability_threshold,
             annotation_col="total_raw_annotation",
+        )
+
+        corr_avg: pd.Series = fnl_df.groupby(pd.Grouper(key="utc_datetime", freq=f"{averaging_period}min")).apply(
+            function_correct_average_using_annotation
         )
 
         # TODO: remove roundings
@@ -356,8 +366,8 @@ class MinuteAveraging:
         # creating a new column for annotating unavailable averages
         minute_averaging["ann_unidentified_change"] = 0
 
-        temp: pd.DataFrame = minute_averaging[f"{parameter}_avg"]
-        temp_diff: pd.DataFrame = temp.diff().abs()
+        temp: pd.Series[Any] = minute_averaging[f"{parameter}_avg"]
+        temp_diff: pd.Series[Any] = temp.diff().abs()
 
         minute_averaging["ann_jump_couples"] = 0
         minute_averaging["ann_invalid_datum"] = 0
@@ -403,7 +413,7 @@ class MinuteAveraging:
     @staticmethod
     def minute_averaging_dataframe_processing(
         minute_averaging: pd.DataFrame, availability_threshold: float, preprocess_time_window: int
-    ):
+    ) -> pd.DataFrame:
         """Various processes regarding the minute averaging dataframe.
 
         Args:
@@ -539,6 +549,7 @@ class MinuteAveraging:
 
         # Removing the first 'time_window_median' minutes of data in order to exclude the extra
         # time period required only for median calculation
+        minute_averaging.index = pd.to_datetime(minute_averaging.index)
         cutoff_time = minute_averaging.index[0] + pd.Timedelta(minutes=preprocess_time_window - 1)
         minute_averaging = minute_averaging[minute_averaging.index > cutoff_time]
 

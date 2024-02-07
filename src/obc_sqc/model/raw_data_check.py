@@ -4,19 +4,21 @@ import numpy as np
 import pandas as pd
 
 
-class RawDataChecks:  # noqa: D101
+class RawDataCheck:
+    """Checks in raw data."""
+
     @staticmethod
-    def raw_data_suspicious_check(  # noqa: PLR0915
-        fnl_df,
-        parameter,
-        control_threshold,
-        minimum_timestep,
-        time_window,
-        availability_threshold_median,
-        ann_unident_spk,
-        ann_no_datum,
-        ann_invalid_datum,
-    ):
+    def raw_data_suspicious_check(
+        fnl_df: pd.DataFrame,
+        parameter: str,
+        control_threshold: float,
+        minimum_timestep: int,
+        time_window: int,
+        availability_threshold_median: float,
+        ann_unident_spk: int,
+        ann_no_datum: int,
+        ann_invalid_datum: int,
+    ) -> pd.DataFrame:
         """Detects faulty observations based on WMO criteria.
 
         Furthermore, it annotates as faulty the observation which is unavailable or has the greatest difference
@@ -30,7 +32,7 @@ class RawDataChecks:  # noqa: D101
             as faulty.
         fnl_df (df): the output of time_normalisation_dataframe def, which is a dataframe with a fixed temporal
         resolution parameter (str): the parameter that this def looks into, e.g., temperature, humidity, wind speed etc.
-        control_threshold (int): the threshold to check for jumps in a parameter
+        control_threshold (float): the threshold to check for jumps in a parameter
         minimum_timestep (int): the timestep of the reframed raw data (e.g., 16sec) [in seconds]
         time_window (int): the time window for rolling median [in minutes]
         availability_threshold_median (float): the availability threshold, e.g., we are able to calculate median
@@ -48,8 +50,7 @@ class RawDataChecks:  # noqa: D101
                 not available median, not available datum, constant data, unidentified spike
                 (for both all- and -reward faulty data)
             f. text annotations for all reasons that a datum is faulty
-        """  # noqa: D202
-
+        """
         # Sort the DataFrame by date
         fnl_df = fnl_df.sort_values("utc_datetime")
 
@@ -57,22 +58,25 @@ class RawDataChecks:  # noqa: D101
         if fnl_df.index.name is None:
             # Ensure that UTC datetime is of type 'datetime64[ns]', otherwise the 'rolling' fails downstream
             fnl_df["utc_datetime"] = pd.to_datetime(fnl_df["utc_datetime"])
-            fnl_df.set_index("utc_datetime", inplace=True)  # noqa: PD002
+            fnl_df = fnl_df.set_index("utc_datetime")
 
-        # We exclude the parameter of wind direction. No hump check can be applied on wind direction.
-        if parameter != "wind_direction" and parameter != "precipitation_accumulated":  # noqa: PLR1714
+        # We exclude the parameters of wind direction and precipitation.
+        # No hump check can be applied for them.
+        if parameter not in {"wind_direction", "precipitation_accumulated"}:
             # Calculating the 10-min rolling median
-            rolling_median = fnl_df[f"{parameter}_for_raw_check"].rolling(f"{time_window}min").median()
+            rolling_median: pd.Series = fnl_df[f"{parameter}_for_raw_check"].rolling(f"{time_window}min").median()
 
             # Getting the number of available observations within the time_window
-            available_observations = fnl_df[f"{parameter}_for_raw_check"].rolling(f"{time_window}min").count()
+            available_observations: pd.Series = (
+                fnl_df[f"{parameter}_for_raw_check"].rolling(f"{time_window}min").count()
+            )
 
-            # Calculating the total number of possible observations within the time_
+            # Calculating the total number of possible observations within the time
             # window (e.g., 10 minutes / 16 seconds)
-            possible_observations = time_window * 60 / minimum_timestep
+            possible_observations: float = time_window * 60 / minimum_timestep
 
             # Finding the percentage of the available observations
-            percentage_available = available_observations / possible_observations
+            percentage_available: pd.Series = available_observations / possible_observations
 
             # Assign np.nan to rolling median where percentage of available observations is
             # less than the availability_threshold_median (e.g., 67%)
@@ -88,7 +92,7 @@ class RawDataChecks:  # noqa: D101
             fnl_df["median_diff_abs"] = (fnl_df[f"{parameter}_for_raw_check"] - fnl_df["rolling_median"]).abs()
 
             # Annotate both the values of a couple of observations with 1 and finally
-            # annotate which values has a larger difference from median
+            # annotate which values have a larger difference from median
             # Create 4 columns to use them for annotation
             fnl_df["ann_jump_couples"] = 0  # for annotating both observations in case of an invalid jump
 
@@ -101,42 +105,41 @@ class RawDataChecks:  # noqa: D101
             # if there is no datum in a certain timeslot
             fnl_df["ann_no_datum"] = 0
 
-            temp = fnl_df[f"{parameter}_for_raw_check"]
-            fnl_df.reset_index(inplace=True)  # noqa: PD002
+            temp: pd.Series = fnl_df[f"{parameter}_for_raw_check"]
 
-            for i in range(1, len(temp)):
-                prev_val = fnl_df.loc[i - 1, "median_diff_abs"] if i > 0 else 0
-                curr_val = fnl_df.loc[i, "median_diff_abs"]
-                prev_or_cur_val_is_missing: bool = prev_val is pd.NA or curr_val is pd.NA
+            temp_diff: pd.Series = temp.diff().abs()
 
-                # check if difference is larger than the defined threshold
-                diff = abs(temp[i] - temp[i - 1]) if temp[i] is not pd.NA and temp[i - 1] is not pd.NA else pd.NA
-                if not prev_or_cur_val_is_missing:
-                    if diff > control_threshold:
-                        fnl_df.loc[i, "ann_jump_couples"] = 1
-                        fnl_df.loc[i - 1, "ann_jump_couples"] = 1
+            fnl_df["ann_jump_couples"] = 0
+            fnl_df["ann_invalid_datum"] = 0
 
-                        # In case the difference is large, check which abs(value-median)
-                        # of the couple of observations is larger and annotate
-                        if prev_val > curr_val:
-                            fnl_df.loc[i - 1, "ann_invalid_datum"] = ann_invalid_datum
-                        elif curr_val > prev_val:
-                            fnl_df.loc[i, "ann_invalid_datum"] = ann_invalid_datum
+            # check if difference is larger than the defined threshold
+            mask_diff_larger_than_threshold: pd.Series = temp_diff > control_threshold
+            fnl_df.loc[mask_diff_larger_than_threshold, "ann_jump_couples"] = 1
+            fnl_df.loc[mask_diff_larger_than_threshold.shift(-1).fillna(False), "ann_jump_couples"] = 1
 
-                else:
-                    fnl_df.loc[i, "ann_jump_couples"] = 0
-                    fnl_df.loc[i, "ann_invalid_datum"] = 0
+            # In case the difference is large, check which abs(value-median)
+            # of the couple of observations is larger and annotate
+            mask_prev_val_bigger_than_curr: pd.Series = fnl_df["median_diff_abs"].shift(1) > fnl_df["median_diff_abs"]
+            mask_curr_val_bigger_than_prev: pd.Series = fnl_df["median_diff_abs"] > fnl_df["median_diff_abs"].shift(1)
 
-                # Annotating as invalid, observations that are equal to a previous invalid value
-                if not prev_or_cur_val_is_missing:
-                    if temp[i] == temp[i - 1] and fnl_df["ann_invalid_datum"][i - 1] == ann_invalid_datum:
-                        fnl_df.loc[i, "ann_invalid_datum"] = ann_invalid_datum
-                else:
-                    fnl_df.loc[i, "ann_invalid_datum"] = 0
+            fnl_df.loc[
+                (mask_diff_larger_than_threshold & mask_prev_val_bigger_than_curr).shift(-1).fillna(False),
+                "ann_invalid_datum",
+            ] = ann_invalid_datum
+            fnl_df.loc[
+                (mask_diff_larger_than_threshold & mask_curr_val_bigger_than_prev),
+                "ann_invalid_datum",
+            ] = ann_invalid_datum
 
-            no_median_mask = fnl_df["rolling_median"].isnull()  # noqa: PD003
-            ann_jump_couples_mask = fnl_df["ann_jump_couples"] == 1
-            combined_mask = no_median_mask & ann_jump_couples_mask
+            # Annotating as invalid, observations that are equal to a previous invalid value
+            mask_invalid_equal_to_prev: pd.Series = (temp == temp.shift(1)) & (
+                fnl_df["ann_invalid_datum"].shift(1) == ann_invalid_datum
+            )
+            fnl_df.loc[mask_invalid_equal_to_prev, "ann_invalid_datum"] = ann_invalid_datum
+
+            no_median_mask: pd.Series = fnl_df["rolling_median"].isna()
+            ann_jump_couples_mask: pd.Series = fnl_df["ann_jump_couples"] == 1
+            combined_mask: pd.Series = no_median_mask & ann_jump_couples_mask
 
             # Annotate for 'ann_unidentified_spike' where 'median_diff_abs' is null, but there are unexpected spikes
             fnl_df.loc[combined_mask, "ann_unidentified_spike"] = ann_unident_spk
@@ -144,7 +147,7 @@ class RawDataChecks:  # noqa: D101
         # As this series of checks is not for wind direction, all the
         # following columns are created just for facilitating the algorithm
         else:
-            fnl_df.reset_index(inplace=True)  # noqa: PD002
+            fnl_df = fnl_df.reset_index()
             fnl_df["rolling_median"] = np.nan
             fnl_df["consec_obs_diff_abs"] = np.nan
             fnl_df["median_diff_abs"] = np.nan
@@ -154,7 +157,7 @@ class RawDataChecks:  # noqa: D101
             fnl_df["ann_no_datum"] = 0
 
         # Create a boolean mask where missing values are marked as True. So, unavailable data are annotated.
-        no_observation_mask = fnl_df[parameter].isnull()  # noqa: PD003
+        no_observation_mask: pd.Series = fnl_df[parameter].isna()
         fnl_df.loc[no_observation_mask, "ann_no_datum"] = ann_no_datum
 
         # Make a new column where all faulty elements (for any reason)
@@ -185,5 +188,7 @@ class RawDataChecks:  # noqa: D101
             0,
         )
 
-        fnl_df.set_index("utc_datetime", inplace=True)  # noqa: PD002
+        if "utc_datetime" in fnl_df.columns:
+            fnl_df = fnl_df.set_index("utc_datetime")
+
         return fnl_df
