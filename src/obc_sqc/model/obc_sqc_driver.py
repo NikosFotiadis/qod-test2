@@ -119,9 +119,7 @@ class ObcSqcCheck:
                 ann_no_datum,
                 ann_invalid_datum,
             )
-            final_df_param = AnnotationUtils.text_annotation(
-                final_df_param, time_window_constant[i], time_window_constant_max[i]
-            )
+            final_df_param = AnnotationUtils.text_annotation(final_df_param)
 
             # minute_averaging() can produce averages per minute (for WS1000) or per hour (for WS2000)
             final_df_param, minute_averaging = MinuteAveraging.minute_averaging(
