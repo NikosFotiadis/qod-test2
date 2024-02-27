@@ -144,10 +144,15 @@ class ConstantDataCheck:
         )
 
         # Create a column for the median humidity in the rolling window
+        #fnl_df["median_humidity"] = (
+        #    fnl_df["humidity_for_raw_check"]
+        #    .rolling(f"{time_window_const}min", min_periods=1, closed="left")
+        #    .apply(np.nanmedian)
+        #)
         fnl_df["median_humidity"] = (
             fnl_df["humidity_for_raw_check"]
             .rolling(f"{time_window_const}min", min_periods=1, closed="left")
-            .apply(np.nanmedian)
+            .apply(lambda x: np.nanpercentile(x, 50))
         )
 
         # Count the number of rows for a day of the dataframe using as reference the last timestamp of the df

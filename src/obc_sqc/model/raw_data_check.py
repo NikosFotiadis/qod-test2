@@ -191,4 +191,103 @@ class RawDataCheck:
         if "utc_datetime" in fnl_df.columns:
             fnl_df = fnl_df.set_index("utc_datetime")
 
+        if parameter=='humidity':
+            #fnl_df.to_csv(f"raw.csv", index=True)
+            import matplotlib.pyplot as plt
+
+            from datetime import timedelta
+
+            # Step 1: Filter data from the last day
+            last_day_data = fnl_df[fnl_df['date'].dt.date == fnl_df.index.max().date()]
+
+            # Step 2: Extract hour information and create a new column
+            last_day_data['hour'] = last_day_data.index.hour
+
+
+            # Step 3: Group by 'hour' and count non-null rows
+            hourly_counts = last_day_data.groupby('hour').count()['pressure'].fillna(0)
+
+
+            # Reindex to include all hours and fill missing values with 0
+            all_hours = pd.Index(range(24), name='hour')
+            hourly_counts = hourly_counts.reindex(all_hours, fill_value=0)
+
+            # Plot bars
+            plt.bar(hourly_counts.index, hourly_counts.values, width=0.8, color='blue', alpha=0.7)
+
+            # Customize the plot
+            plt.xlabel('Hour [UTC]')
+            plt.ylabel('Incoming data packages')
+            plt.title(f'Incoming data packages per hour - {fnl_df.iloc[-2]["date"].strftime("%d/%m/%Y")}')
+            plt.grid(axis='y')  # Show grid lines on the y-axis
+
+            y_axis_range = 225 #M5:225, Helium: 21 #CHANGE THIS!!!
+            y_axis_interval = 25 #M5:25, Helium: 2 #CHANGE THIS!!!
+            plt.axhline(y=60, color='gray', linestyle='--')
+
+            # Set y-axis range from 0 to 21
+            plt.ylim(0, y_axis_range)
+
+            # Set x-axis ticks to cover the entire 24-hour period
+            plt.xticks(range(24))
+
+            # Display integer tick labels
+            plt.yticks(range(0, y_axis_range+1, y_axis_interval))
+
+            #plt.savefig('hourly_counts_last_24_hours_plot.png')
+
+
+
+
+            # Step 2: Set 'date' as the index (if not already)
+            last_day_data.set_index('date', inplace=True)
+            # Step 2: Resample data to 10-minute averages
+            resampled_data = last_day_data.resample('1T').mean()
+
+            # Step 4: Create subplots
+            fig, axes = plt.subplots(nrows=5, ncols=1, figsize=(10, 15), sharex=True)
+
+            # Function to plot with gaps for missing values
+            def plot_with_gaps(ax, x, y, label, color, units, y_range=None, use_markers=False):
+                mask = np.isfinite(y)  # Identify non-NaN values
+                if use_markers:
+                    ax.scatter(x[mask], y[mask], label=label, color=color, marker='o')
+                else:
+                    ax.plot(x[mask], y[mask], label=label, color=color)
+                ax.set_ylabel(f'{label} ({units})', color=color)
+                ax.tick_params(axis='y', labelcolor=color)
+                if y_range is not None:
+                    ax.set_ylim(y_range)
+
+                if label=='Wind Direction':
+                    ax.set_xlabel('Hour [UTC]')
+
+            # Plot a: temperature (left axis) and humidity (right axis)
+            plot_with_gaps(axes[0], resampled_data.index, resampled_data['temperature'], 'Temperature', 'blue', '°C')
+
+            axes_humidity = axes[0].twinx()
+            plot_with_gaps(axes_humidity, resampled_data.index, resampled_data['humidity'], 'Humidity', 'green', '%', y_range=(10, 100))
+
+            # Plot b: pressure
+            plot_with_gaps(axes[1], resampled_data.index, resampled_data['pressure'], 'Pressure', 'orange', 'mb')
+
+            # Plot c: illuminance
+            plot_with_gaps(axes[2], resampled_data.index, resampled_data['illuminance']/122, 'Solar Irradiance', 'red', 'W/m^2')
+            axes[2].axhline(1000, color='maroon', linestyle='--', label='Threshold')
+            # Plot d: wind_speed
+            plot_with_gaps(axes[3], resampled_data.index, resampled_data['wind_speed'], 'Wind Speed', 'purple', 'm/s', y_range=(0, 20))
+
+            # Plot e: wind_direction
+            plot_with_gaps(axes[4], resampled_data.index, resampled_data['wind_direction'], 'Wind Direction', 'brown', '°', use_markers=True)
+            axes[4].axhline(360, color='maroon', linestyle='--', label='Threshold')
+
+            # Customize x-axis ticks
+            plt.xticks(resampled_data.index[::60], labels=resampled_data.index.strftime('%H')[::60], rotation=45, ha='right')
+            
+            for ax in axes:
+                ax.grid(True)
+            # Display the plot
+            plt.tight_layout()
+            plt.title(f'Weather Data for - {fnl_df.iloc[-2]["date"].strftime("%d/%m/%Y")}')
+            plt.savefig(f'{fnl_df.iloc[-2]["date"].strftime("%d_%m_%Y")}.png')
         return fnl_df

@@ -67,7 +67,7 @@ def main():
     ].reset_index(drop=True)
 
     result_df: pd.DataFrame = qod_model.run(df_with_schema)
-
+    result_df.to_csv(f"fnl.csv", index=True)
     pd.set_option("display.max_rows", 500)
     pd.set_option("display.max_columns", 500)
     pd.set_option("display.width", 1000)
