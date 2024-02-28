@@ -192,3 +192,4 @@ drivers
 /cprofile.pstats
 
 *.png
+*.txt
